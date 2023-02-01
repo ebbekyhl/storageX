@@ -38,22 +38,29 @@ plt.rcParams['ytick.direction'] = 'out'
 plt.rcParams['axes.axisbelow'] = True
 
 # Read result configurations
-filename = '../results/sspace_w_sectorcoupling.csv'
+# filename = '../results/sspace_w_sectorcoupling.csv'
+filename = '../results/sspace_w_sectorcoupling_merged.csv'
 df = pd.read_csv(filename,index_col=0).fillna(0)
 df_T = df.T
 df_T = df_T.query('sector == @sector').drop(columns='sector').astype(float)
 df_T = df_T.sort_values(by='c_hat [EUR/kWh]')
 df_T['E [TWh]'] = df_T['E [GWh]']*1e-3 # convert GWh to TWh
 df_T = df_T.loc[df_T['eta1 [-]'][df_T['eta1 [-]'] <= 1].index]
+df_T['E_cor [TWh]'] = df_T['E [TWh]']*df_T['eta2 [-]']
 df = df_T.reset_index(drop=True).T
+#%%
+# df = df[df.loc['load_coverage [%]'][df.loc['load_coverage [%]'] < 2].index]
+df = df[df.loc['E_cor [TWh]'][df.loc['E_cor [TWh]'] <= 15].index]
+rolling_interval = 20
 
 # Threshold that storage configurations should fulfill to be included in the analysis
-threshold_E = 2000 # GWh
+threshold_E = 0# 2000 # GWh
 
 #%% Generation mix
 
 # Variable used for sorting the configurations
-x_vars = ['load_coverage [%]']
+# x_vars = ['load_coverage [%]']
+x_vars = ['E_cor [TWh]']
 
 # Total generation
 gen_tot = (df.loc['gas_OCGT_gen [MWh]'] + df.loc['gas_CCGT_gen [MWh]']
@@ -79,8 +86,8 @@ for x_var in x_vars:
     ax1 = plt.subplot(gs[0:1,:]) #,sharex=ax)
     ax2 = plt.subplot(gs[1:2,:])
     ax3 = plt.subplot(gs[2:3,:])
-    x_vardic = {'E [GWh]':'E','G_discharge [GW]':'G_d','G_charge [GW]':'G_c','load_coverage [%]':'load_coverage','c_hat [EUR/kWh]':'chat'}
-    x_vardic1 = {'E [GWh]':'E [GWh]','G_discharge [GW]':'G_d [GW]','G_charge [GW]':'G_c [GW]','load_coverage [%]':'load coverage ' + r'$LC^X$' + ' [%]','c_hat [EUR/kWh]':'chat'}
+    x_vardic = {'E [GWh]':'E','E_cor [TWh]':'E_cor [TWh]','G_discharge [GW]':'G_d','G_charge [GW]':'G_c','load_coverage [%]':'load_coverage','c_hat [EUR/kWh]':'chat'}
+    x_vardic1 = {'E [GWh]':'E [GWh]','E_cor [TWh]':'E_cor [TWh]','G_discharge [GW]':'G_d [GW]','G_charge [GW]':'G_c [GW]','load_coverage [%]':'load coverage ' + r'$LC$' + ' [%]','c_hat [EUR/kWh]':'chat'}
     
     df_plot = pd.DataFrame()
     df_plot['tot'] = gen_tot.loc[x.T.index]
@@ -145,7 +152,7 @@ for x_var in x_vars:
     df_caps['battery'] = x.loc['G_battery [GW]'] + x.loc['G_homebattery [GW]']
     df_caps['battery_E'] = (x.loc['E_battery [GWh]'] + x.loc['E_homebattery [GWh]'])/1e3
     df_caps['X_power'] = x.loc['G_discharge [GW]']
-    df_caps['X_energy'] = x.loc['E [TWh]']
+    df_caps['X_energy'] = x.loc['E_cor [TWh]']
     df_caps['gas_OCGT'] = x.loc['cap_gas_OCGT [GW]']#/df_plot['tot']*100
     df_caps['gas_CCGT'] = x.loc['cap_gas_CCGT [GW]']
     df_caps['gas'] = df_caps['gas_OCGT'] + df_caps['gas_CCGT']
@@ -182,35 +189,35 @@ for x_var in x_vars:
     
     ax1.plot(df_caps['solar'],color=tech_colors('solar'),lw=0.05,alpha=0.5)
     ax1.plot(df_caps['wind'],color=tech_colors('onwind'),lw=0.05,alpha=0.5)
-    ax1.plot((df_caps['solar'].rolling(15).mean()).iloc[0:-5],color=tech_colors('solar'),lw=2)
-    ax1.plot((df_caps['wind'].rolling(15).mean()).iloc[0:-5],color=tech_colors('onwind'),lw=2)
+    ax1.plot((df_caps['solar'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('solar'),lw=2)
+    ax1.plot((df_caps['wind'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('onwind'),lw=2)
 
     ax2.plot(df_caps['gas'],color=tech_colors('gas'),lw=0.05,alpha=0.5)
-    ax2.plot((df_caps['gas'].rolling(15).mean()).iloc[0:-5],color=tech_colors('gas'),lw=2)
+    ax2.plot((df_caps['gas'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('gas'),lw=2)
     
     if df_caps['nuclear'].max() > 1:
         ax2.plot(df_caps['nuclear'],color=tech_colors('nuclear'),lw=0.05,alpha=0.5)
-        ax2.plot((df_caps['nuclear'].rolling(15).mean()).iloc[0:-5],color=tech_colors('nuclear'),lw=2)
+        ax2.plot((df_caps['nuclear'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('nuclear'),lw=2)
     if df_caps['coal'].max() > 1:
         ax2.plot(df_caps['coal'],color=tech_colors('coal'),lw=0.05,alpha=0.5)
-        ax2.plot((df_caps['coal'].rolling(15).mean()).iloc[0:-5],color=tech_colors('coal'),lw=2)
+        ax2.plot((df_caps['coal'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('coal'),lw=2)
     if df_caps['gas_CHP_CC'].max() > 1:
         ax2.plot(df_caps['gas_CHP_CC'],color=tech_colors('gas CHP CC'),lw=0.05,alpha=0.5)
-        ax2.plot((df_caps['gas_CHP_CC'].rolling(15).mean()).iloc[0:-5],color=tech_colors('gas CHP CC'),lw=2)
+        ax2.plot((df_caps['gas_CHP_CC'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('gas CHP CC'),lw=2)
     if df_caps['gas_CHP'].max() > 1:
         ax2.plot(df_caps['gas_CHP'],color=tech_colors('gas CHP'),lw=0.05,alpha=0.5)
-        ax2.plot((df_caps['gas_CHP'].rolling(15).mean()).iloc[0:-5],color=tech_colors('gas CHP'),lw=2)
+        ax2.plot((df_caps['gas_CHP'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('gas CHP'),lw=2)
     if df_caps['biomass_CHP_CC'].max() > 1:
         ax2.plot(df_caps['biomass_CHP_CC'],color=tech_colors('biomass CHP CC'),lw=0.05,alpha=0.5)
-        ax2.plot((df_caps['biomass_CHP_CC'].rolling(15).mean()).iloc[0:-5],color=tech_colors('biomass CHP CC'),lw=2)
+        ax2.plot((df_caps['biomass_CHP_CC'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('biomass CHP CC'),lw=2)
     if df_caps['biomass_CHP'].max() > 1:
         ax2.plot(df_caps['biomass_CHP'],color=tech_colors('biomass CHP'),lw=0.05,alpha=0.5)
-        ax2.plot((df_caps['biomass_CHP'].rolling(15).mean()).iloc[0:-5],color=tech_colors('biomass CHP'),lw=2)
+        ax2.plot((df_caps['biomass_CHP'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('biomass CHP'),lw=2)
 
     ax3.plot(df_caps['battery'],color=tech_colors('battery'),lw=0.05,alpha=0.5)
     ax3.plot(df_caps['X_power'],color=tech_colors('storage X'),lw=0.05,alpha=0.5)
-    ax3.plot((df_caps['battery'].rolling(15).mean()).iloc[0:-5],color=tech_colors('battery'),lw=2,label='Battery')
-    ax3.plot((df_caps['X_power'].rolling(15).mean()).iloc[0:-5],color=tech_colors('storage X'),lw=2,label='Storage-X')
+    ax3.plot((df_caps['battery'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('battery'),lw=2,label='Battery')
+    ax3.plot((df_caps['X_power'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('storage X'),lw=2,label='Storage-X')
     
     ax1.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
     ax1.set_xticklabels([])
@@ -238,46 +245,57 @@ for x_var in x_vars:
     fig.savefig('../figures/Generation mix_' + x_vardic[x_var] + '_' + str(sector) + '.pdf',bbox_inches="tight")
 
 #%%
-nsamples = 15
-lw = 0.1
+# fig,ax = plt.subplots(figsize=[10,5])
+# ax.plot(df_caps['battery_E'],color=tech_colors('battery'),lw=0.05,alpha=0.5)
+# ax.plot(df_caps['X_energy'],color=tech_colors('storage X'),lw=0.05,alpha=0.5)
+# ax.plot((df_caps['battery_E'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('battery'),lw=2,label='Battery')
+# ax.plot((df_caps['X_energy'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors('storage X'),lw=2,label='Storage-X')
+# ax.set_ylabel('Energy capacity [TWh]')
+# ax.set_ylim([0,max(df_caps['X_energy'])])
+# ax.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
+# fig.savefig('../figures/Energy_capacity_vs_LC_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
 
-fig = plt.figure(figsize=(11, 6))
-nrows = 1
-ncols = 1
-gs = gridspec.GridSpec(nrows, ncols)
-gs.update(wspace=0)
-gs.update(hspace=0)
-cp = plt.rcParams['axes.prop_cycle'].by_key()['color']
+#%%
+# nsamples = 15
+# lw = 0.1
 
-x_temp_df = pd.DataFrame(x.loc['load_coverage [%]'])
-x_temp_df['E_cor [TWh]'] = x.loc['E [TWh]']*x.loc['eta2 [-]']
-x_temp_df.set_index('load_coverage [%]',inplace=True)
-x_temp_df.sort_index(inplace=True)
+# fig = plt.figure(figsize=(11, 6))
+# nrows = 1
+# ncols = 1
+# gs = gridspec.GridSpec(nrows, ncols)
+# gs.update(wspace=0)
+# gs.update(hspace=0)
+# cp = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-ax = plt.subplot(gs[:,:])
-ax.step(x_temp_df.index,x_temp_df['E_cor [TWh]']*1e3/Gdcap,lw=lw,color=tech_colors('storage X'),alpha=0.5)
-ax.plot(x_temp_df.index,(x_temp_df['E_cor [TWh]']*1e3/Gdcap).rolling(nsamples).mean(),lw=2,color=tech_colors('storage X'),label='Storage-X')
-ax.step(df_caps.index,df_caps['battery_E']*1e3/df_caps['battery'],lw=lw,color=tech_colors('battery'),alpha=0.5)
-ax.plot(df_caps.index,(df_caps['battery_E']*1e3/df_caps['battery']).rolling(nsamples).mean(),lw=2,color=tech_colors('battery'),label='Battery')
-ax.set_xlabel('Storage load coverage ' + r'$LC^X$' + ' [%]')
-ax.set_ylabel('Storage discharge time [h]')
+# x_temp_df = pd.DataFrame(x.loc['load_coverage [%]'])
+# x_temp_df['E_cor [TWh]'] = x.loc['E [TWh]']*x.loc['eta2 [-]']
+# x_temp_df.set_index('load_coverage [%]',inplace=True)
+# x_temp_df.sort_index(inplace=True)
 
-ax.set_xlim([0,18])
+# ax = plt.subplot(gs[:,:])
+# ax.step(x_temp_df.index,x_temp_df['E_cor [TWh]']*1e3/Gdcap,lw=lw,color=tech_colors('storage X'),alpha=0.5)
+# ax.plot(x_temp_df.index,(x_temp_df['E_cor [TWh]']*1e3/Gdcap).rolling(nsamples).mean(),lw=2,color=tech_colors('storage X'),label='Storage-X')
+# ax.step(df_caps.index,df_caps['battery_E']*1e3/df_caps['battery'],lw=lw,color=tech_colors('battery'),alpha=0.5)
+# ax.plot(df_caps.index,(df_caps['battery_E']*1e3/df_caps['battery']).rolling(nsamples).mean(),lw=2,color=tech_colors('battery'),label='Battery')
+# ax.set_xlabel('Storage load coverage ' + r'$LC^X$' + ' [%]')
+# ax.set_ylabel('Storage discharge time [h]')
 
-ax.axhline(2,color='darkgrey',ls='--',lw=1,zorder=-1)
-ax.axhline(6,color='darkgrey',ls='--',lw=1,zorder=-1)
-ax.axhline(24,color='darkgrey',ls='--',lw=1,zorder=-1)
-ax.axhline(24*4,color='darkgrey',ls='--',lw=1,zorder=-1)
+# ax.set_xlim([0,18])
 
-ax.text(ax.get_xlim()[0] + (ax.get_xlim()[1] - ax.get_xlim()[0])*0.9,2.2,'2 hours',fontsize=fs,color='darkgrey')
-ax.text(ax.get_xlim()[0] + (ax.get_xlim()[1] - ax.get_xlim()[0])*0.9,6.5,'6 hours',fontsize=fs,color='darkgrey')
-ax.text(ax.get_xlim()[0] + (ax.get_xlim()[1] - ax.get_xlim()[0])*0.9,24+2,'1 day',fontsize=fs,color='darkgrey')
-ax.text(ax.get_xlim()[0] + (ax.get_xlim()[1] - ax.get_xlim()[0])*0.9,24*4+6,'4 days',fontsize=fs,color='darkgrey')
+# ax.axhline(2,color='darkgrey',ls='--',lw=1,zorder=-1)
+# ax.axhline(6,color='darkgrey',ls='--',lw=1,zorder=-1)
+# ax.axhline(24,color='darkgrey',ls='--',lw=1,zorder=-1)
+# ax.axhline(24*4,color='darkgrey',ls='--',lw=1,zorder=-1)
 
-ax.set_yscale('log')
+# ax.text(ax.get_xlim()[0] + (ax.get_xlim()[1] - ax.get_xlim()[0])*0.9,2.2,'2 hours',fontsize=fs,color='darkgrey')
+# ax.text(ax.get_xlim()[0] + (ax.get_xlim()[1] - ax.get_xlim()[0])*0.9,6.5,'6 hours',fontsize=fs,color='darkgrey')
+# ax.text(ax.get_xlim()[0] + (ax.get_xlim()[1] - ax.get_xlim()[0])*0.9,24+2,'1 day',fontsize=fs,color='darkgrey')
+# ax.text(ax.get_xlim()[0] + (ax.get_xlim()[1] - ax.get_xlim()[0])*0.9,24*4+6,'4 days',fontsize=fs,color='darkgrey')
 
-ax.set_ylim([1,200])
+# ax.set_yscale('log')
 
-fig.legend(bbox_to_anchor=(0.7, 0),ncol=2,prop={'size':fs},frameon=True)
+# ax.set_ylim([1,200])
 
-fig.savefig('../figures/load_hours_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
+# fig.legend(bbox_to_anchor=(0.7, 0),ncol=2,prop={'size':fs},frameon=True)
+
+# fig.savefig('../figures/load_hours_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
