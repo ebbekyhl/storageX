@@ -17,15 +17,17 @@ warnings.filterwarnings('ignore')
 import statsmodels.api as sm
 
 #%% Read data
-file = '../Results/sspace_w_sectorcoupling_merged.csv'
-# file = '../Results/sspace_3888.csv'
+# file = '../Results/sspace_w_sectorcoupling_merged.csv'
+file = '../Results/sspace_3888.csv'
 
 if file == '../Results/sspace_w_sectorcoupling_merged.csv':
     sectors = ['T-H-I-B','T-H','-']
     sector_names = ['Fully sector-coupled','Electricity \n + Heating \n + Land Transport', 'Electricity']
+    lc_dic = 'load_coverage [%]'
 else:
     sectors = ['']
     sector_names = ['Electricity']
+    lc_dic = 'load_shift [%]'
 
 sspace_og = pd.read_csv(file,index_col=0)
 
@@ -65,7 +67,7 @@ for sector in sectors:
     
     # Output
     df1['E_cor'] = sspace.loc['E [GWh]'].astype(float)*df1['eta2']
-    df1['LC'] = sspace.loc['load_coverage [%]'].astype(float)
+    df1['LC'] = sspace.loc[lc_dic].astype(float)
     df1['SCR'] = sspace.loc['c_sys [bEUR]'].astype(float)/(sspace.loc['c_sys [bEUR]'].astype(float).max())
     
     df1 = df1.sort_values(['c_hat','c1','eta1','c2','eta2','tau_SD'])
@@ -110,7 +112,12 @@ for sector in sectors:
 #%% Plotting coefficients of the GLM estimating "E_cor"
 fig,ax = plt.subplots(figsize=[10,6])
 extent = [0, 5, 0, len(sectors)]
-im = ax.imshow(np.array([params_E[2],params_E[1],params_E[0]]), cmap="cool",extent=extent)
+
+if file == '../Results/sspace_w_sectorcoupling_merged.csv':
+    im = ax.imshow(np.array([params_E[2],params_E[1],params_E[0]]), cmap="cool",extent=extent)
+else:
+    im = ax.imshow(np.array(params_E), cmap="cool",extent=extent)
+    
 ax.set_xticks(np.arange(5)+0.5)
 ax.set_xticklabels([r'$\hat{c}$', r'$c_c$',r'$c_d$',r'$\eta_c$',r'$\eta_d$'],fontsize=18)
 ax.set_yticks(np.arange(len(sectors))+0.5)
@@ -135,7 +142,13 @@ fig.savefig('../figures/GLM_coefficients_sectors_E.png',
 #%% Plotting coefficients of the GLM estimating "LC"
 fig,ax = plt.subplots(figsize=[10,6])
 extent = [0, 5, 0, len(sectors)]
-im = ax.imshow(np.array([params_LC[2],params_LC[1],params_LC[0]]), cmap="cool",extent=extent)
+
+if file == '../Results/sspace_w_sectorcoupling_merged.csv':
+    im = ax.imshow(np.array([params_LC[2],params_LC[1],params_LC[0]]), cmap="cool",extent=extent)
+
+else:
+    im = ax.imshow(np.array(params_LC), cmap="cool",extent=extent)
+
 ax.set_xticks(np.arange(5)+0.5)
 ax.set_xticklabels([r'$\hat{c}$', r'$c_c$',r'$c_d$',r'$\eta_c$',r'$\eta_d$'],fontsize=18)
 ax.set_yticks(np.arange(len(sectors))+0.5)
@@ -160,7 +173,12 @@ fig.savefig('../figures/GLM_coefficients_sectors_LC.png',
 #%% Plotting coefficients of the GLM estimating "SCR"
 fig,ax = plt.subplots(figsize=[10,6])
 extent = [0, 5, 0, len(sectors)]
-im = ax.imshow(np.array([params_SCR[2],params_SCR[1],params_SCR[0]]), cmap="cool",extent=extent)
+
+if file == '../Results/sspace_w_sectorcoupling_merged.csv':
+    im = ax.imshow(np.array([params_SCR[2],params_SCR[1],params_SCR[0]]), cmap="cool",extent=extent)
+else:
+    im = ax.imshow(np.array(params_SCR), cmap="cool",extent=extent)
+
 ax.set_xticks(np.arange(5)+0.5)
 ax.set_xticklabels([r'$\hat{c}$', r'$c_c$',r'$c_d$',r'$\eta_c$',r'$\eta_d$'],fontsize=18)
 ax.set_yticks(np.arange(len(sectors))+0.5)

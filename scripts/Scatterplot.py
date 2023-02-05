@@ -4,7 +4,7 @@ Created on Tue Feb  8 14:27:51 2022
 
 @author: au485969
 """
-import seaborn as sns
+# import seaborn as sns
 import matplotlib.gridspec as gridspec
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,14 +15,16 @@ min_max_scaler = preprocessing.MinMaxScaler()
 import warnings
 warnings.filterwarnings('ignore')
 plt.close('all')
-
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%% Define here the system %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # sector = 0 # no sector-coupling
 # sector = 'T-H' # Transportation and heating
 sector = 'T-H-I-B' # Transportation, heating, industry (elec + feedstock), and biomass
 
-# filename = '../results/sspace_3888.csv'
+# filename = '../results/sspace_3888.csv' (does not include sector-coupling)
 filename = '../results/sspace_w_sectorcoupling_merged.csv'
+
+color = 'c_c'
+# color = 'RTE'
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Plotting layout
 fs = 17
@@ -40,16 +42,16 @@ def scatter_hist(x, y, ax_histx, ax_histy):
     ax_histy.tick_params(axis="y", labelleft=False)
 
     # now determine nice limits by hand:
-    bw1_factor = 0.01  # <---------------- This one takes quite a while to compute
-    # bw1_factor = 0.5
+    # bw1_factor = 0.01  # <---------------- This one takes quite a while to compute
+    bw1_factor = 0.5
     binwidth = bw1_factor*(x.max() - x.min())
     xymax = max(np.max(np.abs(x)), np.max(np.abs(y)))
     lim = (int(xymax/binwidth) + 1) * binwidth
     bins = np.arange(-lim, lim + binwidth, binwidth)
     ax_histx.hist(x, color='grey', bins=bins)
     
-    bw2_factor = 0.01  # <---------------- This one takes quite a while to compute
-    # bw2_factor = 0.5
+    # bw2_factor = 0.01  # <---------------- This one takes quite a while to compute
+    bw2_factor = 0.5
     binwidth = bw2_factor*(y.max() - y.min())
     xymax = max(np.max(np.abs(x)), np.max(np.abs(y)))
     lim = (int(xymax/binwidth) + 1) * binwidth
@@ -66,18 +68,25 @@ df_T['E [TWh]'] = df_T['E [GWh]']*1e-3 # convert GWh to TWh
 df_T = df_T.loc[df_T['eta1 [-]'][df_T['eta1 [-]'] <= 1].index] # <-------- Omit charge efficiencies above 1
 
 df = df_T.reset_index(drop=True).T
-threshold_E = 0 # GWh
+threshold_E = 0 # TWh
 
-if filename == '../results/sspace.csv' or filename == '../results/sspace_3888.csv':
-    var = 'load_shift [%]'
-    var_str = 'load_shift'
-else:
-    var = 'load_coverage [%]'
-    var_str = 'load_coverage'
+# For "E" on the x-axis, uncomment this:
+var = 'E [GWh]'
+var_str = 'E'
+yval = 'E'
+
+# For "LC" on the x-axis, uncomment this: 
+# yval = 'lc'
+# if filename == '../results/sspace.csv' or filename == '../results/sspace_3888.csv':
+#     var = 'load_shift [%]'
+#     var_str = 'load_shift'
+# else:
+#     var = 'load_coverage [%]'
+#     var_str = 'load_coverage'
 
 x_low = df[df.loc['E [GWh]'].idxmin()]
-E_cor = df.loc['E [GWh]']*df.loc['eta2 [-]']
-x = df[E_cor[E_cor > threshold_E].index]
+df.loc['E [GWh]'] = df.loc['E [GWh]']*df.loc['eta2 [-]']/1000
+x = df[df.loc['E [GWh]'][df.loc['E [GWh]'] > threshold_E].index]
 
 # Reference store
 r_1 = df[df.loc['eta1 [-]'][df.loc['eta1 [-]'] == 0.5].index]
@@ -96,10 +105,24 @@ Xs = {'eta1 [-]':x.loc['eta1 [-]'].unique(), 'eta2 [-]':x.loc['eta2 [-]'].unique
 
 X_name_dict = {'eta1 [-]':r'$\eta_c$','eta2 [-]':r'$\eta_d$','c1':r'$c_c$','c2':r'$c_d$','c_hat [EUR/kWh]':r'$\hat{c}$','tau [n_days]':r'$\tau_{SD}$'}
 X_name_short_dict = {'RTE':'RTE','eta1 [-]':'eta1','eta2 [-]':'eta2','c1':'c1','c2':'c2','c_hat [EUR/kWh]':'chat','tau [n_days]':'tau'}
-yval = 'lc'
-ylab = {'dt':r'$\frac{E}{G_d}$' + ' [h]','lc':'Load coverage ' + r'$LC^X$' + ' [%]','c_sys':'System cost [bEUR]','c1':'Charge capacity cost [EUR/kW]'}
+ylab = {'dt':r'$\frac{E}{G_d}$' + ' [h]','E':'Energy capacity [GWh]','lc':'Load coverage ' + r'$LC^X$' + ' [%]','c_sys':'System cost [bEUR]','c1':'Charge capacity cost [EUR/kW]'}
+marker_dic = {35:'*',
+              350:'s',
+              490:'^',
+              700:'X'}
+
+marker_dic1 = {0.0625:'.',
+               0.125:'*',
+               0.2375:'<',
+               0.25:'s',
+               0.475:'^',
+               0.9025:'X'}
 #%% Plot system cost and curtailment
-cmap1 = plt.cm.get_cmap('summer_r')
+if color == 'RTE':
+    cmap1 = plt.cm.get_cmap('summer_r')
+else:
+    cmap1 = plt.cm.get_cmap('summer')
+
 xlab = {'c_sys [bEUR]': 'Normalized system cost','battery_' + var_str +' [%]':'Battery load coverage ' + r'$LC^B$' + ' [%]','curtailment':'Average curtailed energy [%]'}
 ylims = {('c_sys [bEUR]',0):[0.86,1.005],
          ('c_sys [bEUR]','T-H'):[0.86,1.005],
@@ -148,35 +171,60 @@ for t in ['curtailment','c_sys [bEUR]']:
     
     RTEs = (df.loc['eta1 [-]']*df.loc['eta2 [-]']).unique()
     RTEs.sort()
-    leg = {}
     it = 0
     for X1 in Xs['eta2 [-]']:
         x_eta2 = x.T.groupby(x.T['eta2 [-]']).get_group(X1)
         for X2 in x_eta2['eta1 [-]'].unique():
             x_eta1 = x_eta2.groupby(x.T['eta1 [-]']).get_group(X2)
             RTE = X1*X2
-            color_var = RTE/(0.95*0.95) # Color according to round-trip efficiency
+            if color == 'RTE':
+                color_var = RTE/(0.95*0.95) # Color according to round-trip efficiency
+            
             # color_var = X1/0.95 # Color according to discharge efficiency
             # color_var = X2/0.95 # Color according to discharge efficiency
             # color_var = c_hat.loc[x_eta1.index]/40  # Color according to energy capacity cost
-            # color_var = c_c.loc[x_eta1.index]/700  # Color according to charge capacity cost
             # color_var = c_d.loc[x_eta1.index]/700  # Color according to discharge capacity cost
+            
+            if color == 'c_c':
+                color_var = c_c.loc[x_eta1.index]/700  # Color according to charge capacity cost
+            
             gen_tech_rel_y = y_plot.loc[x_eta1.index] 
             lc_x = x_eta1[var] 
+            # c_c = x_eta1['c1']
             color1 = cmap1(color_var)
-            leg[it] = ax.scatter(lc_x,gen_tech_rel_y,marker='s',s=10,color=color1,zorder=1000-RTE)
+            
+            # ax.scatter(lc_x,gen_tech_rel_y,marker='s',s=10,color=color1,zorder=1000-RTE)
+            
+            # ax.scatter(lc_x,gen_tech_rel_y,marker=marker_dic1[RTE],s=20,color=color1,zorder=1000-RTE)
+            
+            if color == 'c_c':
+                for j in range(len(lc_x)):
+                    ax.scatter(lc_x.iloc[j],gen_tech_rel_y.iloc[j],marker='s',s=10, zorder=color_var.iloc[j],color=color1[j]) 
+            else:
+                ax.scatter(lc_x,gen_tech_rel_y,marker='s',s=10,color=color1,zorder=1000-RTE)
+            
+
             it += 1
             
     cb_ax = fig.add_axes([0.90,0.11,0.02,0.3])
     # cb_ax.set_zorder(100)
-    cmap = mpl.cm.summer_r
+    
+    if color == 'RTE':
+        cmap = mpl.cm.summer_r
+    if color == 'c_c':
+        cmap = mpl.cm.summer
+    
     cmaplist = [cmap(i) for i in range(cmap.N)]
     cmap = mpl.colors.LinearSegmentedColormap.from_list('Custom cmap', cmaplist, cmap.N)
 
     # define the bins and normalize
-    # RTEs = x.loc['c1'].unique()
-    # RTEs.sort()
-    RTEs = RTEs*100
+    if color == 'c_c':
+        RTEs = x.loc['c1'].unique()
+        RTEs.sort()
+        fig.text(0.91, 0.45, r'$c_c$',fontsize=15)
+    if color == 'RTE':
+        fig.text(0.91, 0.45, r'RTE [%]',fontsize=15)
+        RTEs = RTEs*100
     bounds = [0] + list(RTEs.astype(int))
     
     norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
@@ -184,11 +232,7 @@ for t in ['curtailment','c_sys [bEUR]']:
         spacing='proportional', ticks=bounds, boundaries=bounds, format='%1i')
     cb1.set_ticks(RTEs - np.array([RTEs[0]] + list(np.diff(RTEs)))*0.5)
     cb1.set_ticklabels((RTEs).astype(int))
-    
     cb1.ax.tick_params(labelsize=15)
-    
-    fig.text(0.91, 0.45, r'RTE [%]',fontsize=15)
-    # fig.text(0.91, 0.45, r'$c_c$',fontsize=15)
     
     ax_histx = plt.subplot(gs[0:1,0:-1],sharex=ax)
     ax_histy = plt.subplot(gs[1:,-1],sharey=ax)
@@ -208,10 +252,16 @@ for t in ['curtailment','c_sys [bEUR]']:
     
     ax.set_ylabel(xlab[t])
     ax.set_xlabel(ylab[yval])
-    ax.set_xlim([-0.1,20])
-    ax.set_ylim(ylims[(t,sector)])
-    # fig.savefig('../figures/scatter_plot_' + t + '_' + str(sector) + '_c_c.png', transparent=False,
-    #             bbox_inches="tight",dpi=300)
     
-    fig.savefig('../figures/scatter_plot_' + t + '_' + str(sector) + '.png', transparent=False,
-                bbox_inches="tight",dpi=300)
+    if yval == 'lc':
+        ax.set_xlim([-0.1,20])
+    else:
+        ax.set_xlim([-3,70])
+        
+    ax.set_ylim(ylims[(t,sector)])
+    if color == 'c_c':
+        fig.savefig('../figures/scatter_plot_' + t + '_' + yval + str(sector) + '_c_c.png', transparent=False,
+                    bbox_inches="tight",dpi=300)
+    else:
+        fig.savefig('../figures/scatter_plot_' + t + '_' + yval + '_' + str(sector) + '.png', transparent=False,
+                    bbox_inches="tight",dpi=300)

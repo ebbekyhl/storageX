@@ -295,10 +295,8 @@ ranges = [eta_d_range_plot, c_hat_range_plot, c_c_range_plot, eta_c_range_plot, 
 # df_init = sspace_new[sspace_new.loc['sector'][sspace_new.loc['sector'] == '0'].index]
 # df = df_init.T[['c1','c2','eta1 [-]','eta2 [-]','c_hat [EUR/kWh]','tau [n_days]']]
 # sspace_new = sspace_new.T.drop(df[df.duplicated()].sort_values(['c1','c2','eta1 [-]','eta2 [-]','c_hat [EUR/kWh]','tau [n_days]']).index).T
-
 # sspace_new.to_csv('../results/sspace_w_sectorcoupling_merged.csv')
 
-#%% Read new merged dataset
 sspace_new = pd.read_csv('../results/sspace_w_sectorcoupling_merged.csv',index_col=0).fillna('0')
 
 csv = sspace_new.T.query('sector == @sector').drop(columns='sector').astype(float)

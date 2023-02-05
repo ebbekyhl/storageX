@@ -14,12 +14,17 @@ import matplotlib as mpl
 plt.close('all')
 
 # Plotting function
-def annotate(df, output, nrows, ncols, var1, var2, var_name1, var_name2, ax, quantiles, q, normfactor, shading='auto', colormap="cool_r"):
+def annotate(df, df1_update, output, nrows, ncols, var1, var2, var_name1, var_name2, ax, quantiles, q, normfactor, shading='auto', colormap="cool_r"):
     Z = df[output].values.reshape(nrows, ncols)
     x = np.arange(ncols) 
     y = np.arange(nrows)
+    
+    if output == 'c_sys [bEUR]':
+        vmin = 0.95
+    else:
+        vmin = 0
         
-    im = ax.pcolormesh(x, y, Z, vmin=0, vmax=normfactor,shading=shading, cmap=colormap,zorder=0)
+    im = ax.pcolormesh(x, y, Z, vmin=vmin, vmax=normfactor,shading=shading, cmap=colormap,zorder=0)
     
     ax.scatter(np.meshgrid(x, y)[0],np.meshgrid(x, y)[1],color='grey',alpha=0.5)
 
@@ -111,44 +116,10 @@ def annotate(df, output, nrows, ncols, var1, var2, var_name1, var_name2, ax, qua
     ax.tick_params(axis='y', which='major', pad=15)
     return im
 
-fs = 18
-plt.style.use('seaborn-ticks')
-plt.rcParams['axes.labelsize'] = fs
-plt.rcParams['xtick.labelsize'] = fs
-plt.rcParams['ytick.labelsize'] = fs
-plt.rcParams['xtick.direction'] = 'out'
-plt.rcParams['ytick.direction'] = 'out'
-plt.rcParams['axes.axisbelow'] = True
-
-sspace_og = pd.read_csv('../Results/sspace_w_sectorcoupling.csv',index_col=0)
-# sspace = pd.read_csv('../Results/sspace_3888.csv',index_col=0)
-
-shading = 'nearest' # No interpolation or averaging
-# shading = 'flat' # The color represent the average of the corner values
-# shading='gouraud' # Gouraud: the color in the quadrilaterals is linearly interpolated
-
-omit_charge_efficiency = True # Omits charge efficiencies above 1 (Set to False to keep them in the figure)
-lock_tau = True
-
-cmap = "cool"
-# cmap = "spring_r"
-
-output = 'E_cor'
-# output = 'lc'
-
-normfactor = 2000 # what storage-X needs to provide in terms of cumulative storage energy capacity
-# normfactor = 2 # what storage-X needs to provide in terms of cumulative load coverage over a year
-
-#%% Loop over sectors
-sectors = ['0','T-H','T-H-I-B']
-quantiles = [0.25,0.50,0.75,1.00]
-# quantiles = [0.20,0.40,0.60,0.80]
-figsiz = [16,16]
-for sector in sectors:
+def read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency):
     sspace = sspace_og.fillna('0').T
     sspace = sspace.query('sector == @sector')
     sspace = sspace.drop(columns = 'sector').T.astype(float)
-    
     # Input
     df1 = pd.DataFrame(columns=['c_hat'])
     df1['c_hat'] = sspace.loc['c_hat [EUR/kWh]']
@@ -166,16 +137,71 @@ for sector in sectors:
         df1['E_cor'] = sspace.loc['E [GWh]']*df1['eta2']
     elif output == 'lc':
         df1['lc'] = sspace.loc['load_coverage [%]'].astype(float)
-    
+        df1['E_cor'] = sspace.loc['E [GWh]']*df1['eta2']
+    else:
+        df1[output] = sspace.loc[output].astype(float)
+        df1['E_cor'] = sspace.loc['E [GWh]']*df1['eta2']
+        
     if omit_charge_efficiency:
         df1_update = df1.loc[df1['eta1'][df1['eta1'] < 1].index] # Remove all charge efficiencies above or equal to 1
     else:
         df1_update = df1
-    
+        
     MI_df = df1_update[['eta1','eta2','c1','c2','c_hat',output]].copy()
     MI_df = MI_df.set_index(['eta1','eta2','c1','c2','c_hat']) 
     MI_df.sort_values(['eta1','eta2','c1','c2','c_hat'],inplace=True)
     
+    MI_df.rename(columns={output:'output'},inplace=True)
+    
+    df1_update = df1_update.query("E_cor > 1") # Omit "zero" storage
+    
+    if output != 'E_cor':
+        df1_update.drop(columns=['E_cor'],inplace=True)
+    
+    return df1_update, MI_df
+
+#%%
+fs = 18
+plt.style.use('seaborn-ticks')
+plt.rcParams['axes.labelsize'] = fs
+plt.rcParams['xtick.labelsize'] = fs
+plt.rcParams['ytick.labelsize'] = fs
+plt.rcParams['xtick.direction'] = 'out'
+plt.rcParams['ytick.direction'] = 'out'
+plt.rcParams['axes.axisbelow'] = True
+
+sspace_og = pd.read_csv('../Results/sspace_w_sectorcoupling_merged.csv',index_col=0)
+# sspace_og = pd.read_csv('../Results/sspace_3888.csv',index_col=0)
+
+shading = 'nearest' # No interpolation or averaging
+# shading = 'flat' # The color represent the average of the corner values
+# shading='gouraud' # Gouraud: the color in the quadrilaterals is linearly interpolated
+
+omit_charge_efficiency = True # Omits charge efficiencies above 1 (Set to False to keep them in the figure)
+lock_tau = False # True
+
+cmap = "cool"
+# cmap = "spring_r"
+
+output = 'E_cor'
+# output = 'lc'
+# output = 'c_sys [bEUR]'
+
+normfactor = 2000 # what storage-X needs to provide in terms of cumulative storage energy capacity
+# normfactor = 2 # what storage-X needs to provide in terms of cumulative load coverage over a year
+# normfactor = 1
+#%% Loop over sectors
+# sectors = ['0','T-H','T-H-I-B']
+sectors = ['T-H-I-B']
+# quantiles = [0.06,0.12,0.15,0.18]
+quantiles = [0.25,0.50,0.75,1.00]
+figsiz = [16,16]
+for sector in sectors:
+    df1_update,MI_df = read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency)
+    
+    if output == 'c_sys [bEUR]':
+        df1_update[output] = df1_update[output]/df1_update[output].max()
+        MI_df['output'] = MI_df['output']/MI_df['output'].max()
     #%% Loop over quantiles
     fig, ax = plt.subplots(len(quantiles),3,figsize=figsiz)
     plt.subplots_adjust(wspace=0.3,
@@ -193,12 +219,12 @@ for sector in sectors:
         # -------------------------- #
         extra_indeces = [] # We are reducing the space from 5D to 2D. Here, we collect descriptors from the omitted 3D space.
         for i in range(len(df_etas)):
-            E_out = df_etas.iloc[i].item()
-            if np.isnan(E_out):
+            out = df_etas.iloc[i].item()
+            if np.isnan(out):
                 list_add = ('','','')
                 extra_indeces.append(list_add)
             else:        
-                list_add = MI_df.query("E_cor == @E_out").index[0][2:]
+                list_add = MI_df.query("output == @out").index[0][2:]
                 extra_indeces.append(list_add)
         df_etas['extra_coordinates'] = extra_indeces
         # ---------------------------#
@@ -208,8 +234,8 @@ for sector in sectors:
         # ---------------------------#
         extra_indeces = []
         for i in range(len(df_cs)):
-            E_out = df_cs.iloc[i].item()
-            list_adds = MI_df.query("E_cor == @E_out").index[0]
+            out = df_cs.iloc[i].item()
+            list_adds = MI_df.query("output == @out").index[0]
             list_add = list_adds[0:2] + (list_adds[-1],) 
             extra_indeces.append(list_add)
         df_cs['extra_coordinates'] = extra_indeces
@@ -240,12 +266,12 @@ for sector in sectors:
         # ---------------------------#
         extra_indeces = []
         for i in range(len(df_chat_eta2)):
-            E_out = df_chat_eta2.iloc[i].item()
-            if np.isnan(E_out):
+            out = df_chat_eta2.iloc[i].item()
+            if np.isnan(out):
                 list_add = ('','','')
                 extra_indeces.append(list_add)
             else:
-                list_adds = MI_df.query("E_cor == @E_out").index[0]
+                list_adds = MI_df.query("output == @out").index[0]
                 list_add = (list_adds[0],) + list_adds[2:4] 
                 extra_indeces.append(list_add)
         df_chat_eta2['extra_coordinates'] = extra_indeces
@@ -255,17 +281,17 @@ for sector in sectors:
         # Capacity cost
         nrows = 4
         ncols = 4
-        im = annotate(df_cs, output, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[q,0], quantiles=quantiles, q=q, normfactor=normfactor, shading=shading, colormap=cmap)
+        im = annotate(df_cs, df1_update,output, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[q,0], quantiles=quantiles, q=q, normfactor=normfactor, shading=shading, colormap=cmap)
         
         # Efficiency
         nrows = 3
         ncols = 3 if omit_charge_efficiency else 4 
-        im = annotate(df_etas, output, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[q,1], quantiles=quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
+        im = annotate(df_etas, df1_update, output, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[q,1], quantiles=quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
         
         # Energy capacity cost vs discharge efficiency
         nrows = 3
         ncols = 7
-        im = annotate(df_chat_eta2, output, nrows, ncols, var1='eta2',var2='c_hat',var_name1=r'$\hat{c}$' + ' [€/kWh]',var_name2=r'$\eta_d$'+ ' [-]', ax=ax[q,2], quantiles = quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
+        im = annotate(df_chat_eta2, df1_update, output, nrows, ncols, var1='eta2',var2='c_hat',var_name1=r'$\hat{c}$' + ' [€/kWh]',var_name2=r'$\eta_d$'+ ' [-]', ax=ax[q,2], quantiles = quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
         
         q += 1
    #%%    
@@ -273,22 +299,24 @@ for sector in sectors:
     cb_ax.tick_params(direction='out', length=6, width=2, colors='k',
                       grid_color='k', grid_alpha=1)   
     
-    if shading != 'gouraud':
-        bounds = np.linspace(0, normfactor, 5)
-        cmap4norm = plt.cm.get_cmap(cmap)
-        norm = mpl.colors.BoundaryNorm(bounds, cmap4norm.N)
-    else:
+    if shading == 'gouraud':
         norm = mpl.colors.Normalize(vmin=0, vmax=normfactor) 
-    
+    else:
+        if output == 'c_sys [bEUR]':
+            bounds = np.linspace(0.95, normfactor, 5)
+            cmap4norm = plt.cm.get_cmap(cmap)
+            norm = mpl.colors.BoundaryNorm(bounds, cmap4norm.N)
+        else: 
+            bounds = np.linspace(0, normfactor, 5)
+            cmap4norm = plt.cm.get_cmap(cmap)
+            norm = mpl.colors.BoundaryNorm(bounds, cmap4norm.N)
+        
     cb = mpl.colorbar.ColorbarBase(cb_ax,orientation='vertical', cmap= plt.cm.get_cmap(cmap),norm=norm) #,ticks=bounds, boundaries=bounds) #ticks=[0.15,0.25,0.48,0.90])
     cb.ax.tick_params(labelsize=fs)
     
     if output == 'E_cor':
-        # cb.set_ticks([0,250,750,1250,1750])
-        # cb.ax.set_yticklabels(['', '$500$', '$1000$', '$1500$', r'$\geq 2000$'])
         cb.set_ticks([0,1000,1750])
         cb.ax.set_yticklabels(['$0$', '$1000$', r'$\geq 2000$'])
-        
         cb.set_label('$E$' + ' [GWh]', rotation=90,fontsize=fs,labelpad=16)
     
     fig.text(0.9, 0.79, 
@@ -318,27 +346,35 @@ for sector in sectors:
     fig.savefig('../figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '.png', dpi=300, bbox_inches='tight')
 
 
+#%% Make historgrams of "the remaining 3D space"
+
+# Coordinates in the matrix
+coord1 = 'c1'
+coord2 = 'c2'
+
+coord1s = df1_update[coord1].unique()
+coord1s.sort()
+coord2s = df1_update[coord2].unique()
+coord2s.sort()
+
+# Remaining 3D space
+MI_df.reset_index(inplace=True)
+MI_df.set_index([coord1,coord2],inplace=True)
+
+# Pick a point in the 2D grid:
+coords = [(coord1s[0],coord2s[0]),
+          (coord1s[1],coord2s[1]),
+          (coord1s[2],coord2s[2])] # in this case, the diagonal
 #%%
-# coord = (0.5,0.5) # (eta1,eta2)
-
-# coords = [(0.25,0.25),
-#           (0.25,0.50),
-#           (0.25,0.95),
-#           (0.5,0.25),
-#           (0.5,0.50),
-#           (0.5,0.95),
-#           (0.95,0.25),
-#           (0.95,0.50),
-#           (0.95,0.95),
-#           ]
-
-# for coord in coords:
-#     plt.figure()
-#     sns.distplot(MI_df.loc[coord],kde=False)
-#     plt.axvline(MI_df.loc[coord].quantile(0.25).item())
-#     plt.axvline(MI_df.loc[coord].quantile(0.50).item())
-#     plt.axvline(MI_df.loc[coord].quantile(0.75).item())
-
+if output == 'E_cor':
+    for coord in coords:
+        plt.figure()
+        sns.distplot(MI_df.loc[coord]['output'],kde=True).set(xlim=(0, MI_df.loc[coord]['output'].max()*1.05))
+        plt.axvline(MI_df.loc[coord]['output'].quantile(0.25,interpolation='nearest').item(),color='k',ls='--')
+        plt.axvline(MI_df.loc[coord]['output'].quantile(0.50,interpolation='nearest').item(),color='k',ls='--')
+        plt.axvline(MI_df.loc[coord]['output'].quantile(0.75,interpolation='nearest').item(),color='k',ls='--')
+        plt.axvline(MI_df.loc[coord]['output'].quantile(1,interpolation='nearest').item(),color='k',ls='--')
+        plt.title(coord,fontsize=fs)
 
 
 

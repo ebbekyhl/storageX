@@ -49,8 +49,8 @@ eta2 = '1.9'
 chat = '0.01'
 
 # scens = ['','-T-H','-T-H-I-B']
-# scens = ['-T-H-I-B']
-scens = ['','-T-H','-T-H-I-B']
+scens = ['-T-H-I-B']
+# scens = ['','-T-H','-T-H-I-B']
 
 # Moving average equal to 24 takes the first 24 values (with 3-hourly resoulution, this is equivalent to a 3-daily moving average)
 

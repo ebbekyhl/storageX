@@ -14,7 +14,7 @@ import matplotlib as mpl
 plt.close('all')
 
 # Plotting function
-def annotate(df, output, nrows, ncols, var1, var2, var_name1, var_name2, ax, quantiles, q, normfactor, shading='auto', colormap="cool_r"):
+def annotate(df, df1_update, output, nrows, ncols, var1, var2, var_name1, var_name2, ax, quantiles, q, normfactor, shading='auto', colormap="cool_r"):
     Z = df[output].values.reshape(nrows, ncols)
     x = np.arange(ncols) 
     y = np.arange(nrows)
@@ -121,6 +121,33 @@ def annotate(df, output, nrows, ncols, var1, var2, var_name1, var_name2, ax, qua
     ax.tick_params(axis='y', which='major', pad=20)
     return im
 
+def read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency):
+    sspace = sspace_og.fillna('0').T
+    sspace = sspace.query('sector == @sector')
+    sspace = sspace.drop(columns = 'sector').T.astype(float)
+    df1 = pd.DataFrame(columns=['c_hat'])
+    df1['c_hat'] = sspace.loc['c_hat [EUR/kWh]']
+    df1['c1'] = sspace.loc['c1']
+    df1['eta1'] = sspace.loc['eta1 [-]']
+    df1['c2'] = sspace.loc['c2']
+    df1['eta2'] = sspace.loc['eta2 [-]']
+    df1['tau_SD'] = sspace.loc['tau [n_days]']
+    if lock_tau:
+        df1 = df1.loc[df1['tau_SD'][df1['tau_SD'] == 30].index] 
+    if output == 'E_cor':
+        df1['E_cor'] = sspace.loc['E [GWh]']*df1['eta2']
+    elif output == 'lc':
+        df1['lc'] = sspace.loc['load_coverage [%]'].astype(float)
+    if omit_charge_efficiency:
+        df1_update = df1.loc[df1['eta1'][df1['eta1'] < 1].index] # Remove all charge efficiencies above or equal to 1
+    else:
+        df1_update = df1
+    MI_df_g = df1_update[['eta1','eta2','c1','c2','c_hat',output]].copy()
+    MI_df_g = MI_df_g.set_index(['eta1','eta2','c1','c2','c_hat']) 
+    MI_df_g.sort_values(['eta1','eta2','c1','c2','c_hat'],inplace=True)
+    MI_df_g.rename(columns={output:'output'},inplace=True)
+    return df1_update, MI_df_g
+
 fs = 18
 plt.style.use('seaborn-ticks')
 plt.rcParams['axes.labelsize'] = fs
@@ -130,15 +157,16 @@ plt.rcParams['xtick.direction'] = 'out'
 plt.rcParams['ytick.direction'] = 'out'
 plt.rcParams['axes.axisbelow'] = True
 
-sspace_og = pd.read_csv('../Results/sspace_w_sectorcoupling.csv',index_col=0)
-# sspace = pd.read_csv('../Results/sspace_3888.csv',index_col=0)
+sspace_og1 = pd.read_csv('../Results/sspace_w_sectorcoupling.csv',index_col=0)
+sspace_og2 = pd.read_csv('../Results/sspace_w_sectorcoupling_merged.csv',index_col=0)
+# sspace_og = pd.read_csv('../Results/sspace_3888.csv',index_col=0)
 
 shading = 'nearest' # No interpolation or averaging
 # shading = 'flat' # The color represent the average of the corner values
 # shading='gouraud' # Gouraud: the color in the quadrilaterals is linearly interpolated
 
 omit_charge_efficiency = True # Omits charge efficiencies above 1 (Set to False to keep them in the figure)
-lock_tau = True
+lock_tau = False #True
 
 cmap = "cool"
 # cmap = "spring_r"
@@ -150,7 +178,7 @@ normfactor = 2000 # what storage-X needs to provide in terms of cumulative stora
 # normfactor = 2 # what storage-X needs to provide in terms of cumulative load coverage over a year
 
 #%% Loop over sectors
-sectors = ['0','T-H','T-H-I-B']
+sectors = ['T-H-I-B'] #['0','T-H']
 quantiles = [0.25,0.50,0.75,1.00]
 # quantiles = [0.20,0.40,0.60,0.80]
 
@@ -161,38 +189,9 @@ ranges = {0: list(np.arange(0,0.25+0.25/10,0.25/10).round(3)),
 
 figsiz = [16,16]
 for sector in sectors:
-    sspace = sspace_og.fillna('0').T
-    sspace = sspace.query('sector == @sector')
-    sspace = sspace.drop(columns = 'sector').T.astype(float)
     
-    # Input
-    df1 = pd.DataFrame(columns=['c_hat'])
-    df1['c_hat'] = sspace.loc['c_hat [EUR/kWh]']
-    df1['c1'] = sspace.loc['c1']
-    df1['eta1'] = sspace.loc['eta1 [-]']
-    df1['c2'] = sspace.loc['c2']
-    df1['eta2'] = sspace.loc['eta2 [-]']
-    df1['tau_SD'] = sspace.loc['tau [n_days]']
-    
-    if lock_tau:
-        df1 = df1.loc[df1['tau_SD'][df1['tau_SD'] == 30].index] 
-    
-    # Output
-    if output == 'E_cor':
-        df1['E_cor'] = sspace.loc['E [GWh]']*df1['eta2']
-    elif output == 'lc':
-        df1['lc'] = sspace.loc['load_coverage [%]'].astype(float)
-    
-    if omit_charge_efficiency:
-        df1_update = df1.loc[df1['eta1'][df1['eta1'] < 1].index] # Remove all charge efficiencies above or equal to 1
-    else:
-        df1_update = df1
-    
-    MI_df_g = df1_update[['eta1','eta2','c1','c2','c_hat',output]].copy()
-    MI_df_g = MI_df_g.set_index(['eta1','eta2','c1','c2','c_hat']) 
-    MI_df_g.sort_values(['eta1','eta2','c1','c2','c_hat'],inplace=True)
-    MI_df_g.rename(columns={output:'output'},inplace=True)
-    
+    df1_update1,MI_df_g1 = read_sspace(sspace_og1,sector,output,lock_tau,omit_charge_efficiency)
+    df1_update2,MI_df_g2 = read_sspace(sspace_og2,sector,output,lock_tau,omit_charge_efficiency)
     
     #%% Loop over quantiles
     fig, ax = plt.subplots(len(quantiles),3,figsize=figsiz)
@@ -201,15 +200,15 @@ for sector in sectors:
     q = 0
     for quantile in quantiles:
         #%% ---------------- EFFICIENCY ----------------------------
-        df_etas = df1_update.copy()
+        df_etas = df1_update1.copy()
         extra_indeces = [] # We are reducing the space from 5D to 2D. Here, we collect descriptors from the omitted 3D space.
         for i1 in range(len(df_etas)):
             E_out = df_etas[output].iloc[i1].item()   
-            list_add = MI_df_g.query("output == @E_out").index[0][2:]
+            list_add = MI_df_g1.query("output == @E_out").index[0][2:]
             extra_indeces.append(list_add)
         df_etas['extra_coordinates'] = extra_indeces
         
-        MI_df = df1_update[['eta2','eta1','c1','c2','c_hat',output]].copy()
+        MI_df = df1_update1[['eta2','eta1','c1','c2','c_hat',output]].copy()
         MI_df = MI_df.set_index(['eta2','eta1','c1','c2','c_hat']) 
         MI_df.sort_values(['eta2','eta1','c1','c2','c_hat'],inplace=True)
         
@@ -257,14 +256,14 @@ for sector in sectors:
             df_etas.sort_index(inplace=True)
         
         # Get the grouped values: 
-        df_etas[output] = (pd.concat([df1_update[['eta1','eta2',output]]
+        df_etas[output] = (pd.concat([df1_update1[['eta1','eta2',output]]
                           .groupby(['eta2','eta1'])
                           .quantile(qi,interpolation='nearest').copy() 
                           for qi in ranges[q]]).groupby(['eta2','eta1'])
-                            .max()) # <-----------------------------------------WE CAN TAKE MAX/MEAN/MEDIAN
+                            .mean()) # <-----------------------------------------WE CAN TAKE MAX/MEAN/MEDIAN
         
         #%% ---------------- POWER CAPACITY COST ----------------------------
-        df_cs = df1_update.copy()
+        df_cs = df1_update1.copy()
         
         if not omit_charge_efficiency:
             df_cs = df_cs[df_cs['eta1'] < 1]
@@ -272,12 +271,12 @@ for sector in sectors:
         extra_indeces = [] # We are reducing the space from 5D to 2D. Here, we collect descriptors from the omitted 3D space.
         for i1 in range(len(df_cs)):
             E_out = df_cs[output].iloc[i1].item()   
-            list_adds = MI_df_g.query("output == @E_out").index[0]
+            list_adds = MI_df_g1.query("output == @E_out").index[0]
             list_add = list_adds[0:2] + (list_adds[-1],) 
             extra_indeces.append(list_add)
         df_cs['extra_coordinates'] = extra_indeces
         
-        MI_df = df1_update[['c2','c1','eta1','eta2','c_hat',output]].copy()
+        MI_df = df1_update1[['c2','c1','eta1','eta2','c_hat',output]].copy()
         if not omit_charge_efficiency:
             MI_df = MI_df[MI_df['eta1'] < 1]
         MI_df = MI_df.set_index(['c2','c1','eta1','eta2','c_hat']) 
@@ -337,11 +336,11 @@ for sector in sectors:
         df_cs = threshold.copy()
         
         # Get the grouped values: 
-        df_cs[output] = (pd.concat([df1_update[['c1','c2',output]].groupby(['c2','c1']).quantile(qi,interpolation='nearest').copy() for qi in ranges[q]]).groupby(['c2','c1'])
-                          .max()) # <-----------------------------------------WE CAN TAKE MAX/MEAN/MEDIAN
+        df_cs[output] = (pd.concat([df1_update1[['c1','c2',output]].groupby(['c2','c1']).quantile(qi,interpolation='nearest').copy() for qi in ranges[q]]).groupby(['c2','c1'])
+                          .mean()) # <-----------------------------------------WE CAN TAKE MAX/MEAN/MEDIAN
         
         #%% ---------------- ENERGY CAPACITY COST ----------------------------
-        df_chat_eta2 = df1_update.copy()
+        df_chat_eta2 = df1_update2.copy()
         
         if not omit_charge_efficiency:
             df_chat_eta2 = df_chat_eta2[df_chat_eta2['eta1'] < 1]
@@ -349,12 +348,12 @@ for sector in sectors:
         extra_indeces = [] # We are reducing the space from 5D to 2D. Here, we collect descriptors from the omitted 3D space.
         for i1 in range(len(df_chat_eta2)):
             E_out = df_chat_eta2[output].iloc[i1].item()   
-            list_adds = MI_df_g.query("output == @E_out").index[0]
+            list_adds = MI_df_g2.query("output == @E_out").index[0]
             list_add = (list_adds[0],) + list_adds[2:4] 
             extra_indeces.append(list_add)
         df_chat_eta2['extra_coordinates'] = extra_indeces
         
-        MI_df = df1_update[['eta2','c_hat','c2','c1','eta1',output]].copy()
+        MI_df = df1_update2[['eta2','c_hat','c2','c1','eta1',output]].copy()
         if not omit_charge_efficiency:
             MI_df = MI_df[MI_df['eta1'] < 1]
         MI_df = MI_df.set_index(['eta2','c_hat','c2','c1','eta1']) 
@@ -412,8 +411,8 @@ for sector in sectors:
         df_chat_eta2 = threshold.copy()
         
         # Get the grouped values: 
-        df_chat_eta2[output] = (pd.concat([df1_update[['c_hat','eta2',output]].groupby(['eta2','c_hat']).quantile(qi,interpolation='nearest').copy() for qi in ranges[q]]).groupby(['eta2','c_hat'])
-                                 .max()) # <-----------------------------------------WE CAN TAKE MAX/MEAN/MEDIAN
+        df_chat_eta2[output] = (pd.concat([df1_update2[['c_hat','eta2',output]].groupby(['eta2','c_hat']).quantile(qi,interpolation='nearest').copy() for qi in ranges[q]]).groupby(['eta2','c_hat'])
+                                 .mean()) # <-----------------------------------------WE CAN TAKE MAX/MEAN/MEDIAN
 
         if quantile == 1.0:
             df_chat_eta2.loc[(0.25,40.0,),:] = np.nan
@@ -437,17 +436,17 @@ for sector in sectors:
         # Capacity cost
         nrows = 4
         ncols = 4
-        im = annotate(df_cs, output, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[q,0], quantiles=quantiles, q=q, normfactor=normfactor, shading=shading, colormap=cmap)
+        im = annotate(df_cs, df1_update1, output, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[q,0], quantiles=quantiles, q=q, normfactor=normfactor, shading=shading, colormap=cmap)
         
         # Efficiency
         nrows = 3
         ncols = 3 if omit_charge_efficiency else 4 
-        im = annotate(df_etas, output, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[q,1], quantiles=quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
+        im = annotate(df_etas, df1_update1, output, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[q,1], quantiles=quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
         
         # Energy capacity cost vs discharge efficiency
         nrows = 3
         ncols = 7
-        im = annotate(df_chat_eta2, output, nrows, ncols, var1='eta2',var2='c_hat',var_name1=r'$\hat{c}$' + ' [€/kWh]',var_name2=r'$\eta_d$'+ ' [-]', ax=ax[q,2], quantiles = quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
+        im = annotate(df_chat_eta2, df1_update2, output, nrows, ncols, var1='eta2',var2='c_hat',var_name1=r'$\hat{c}$' + ' [€/kWh]',var_name2=r'$\eta_d$'+ ' [-]', ax=ax[q,2], quantiles = quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
         
         q += 1
    #%%    
