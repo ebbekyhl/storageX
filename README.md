@@ -1,6 +1,6 @@
-# storageX
+# Storage-X - Cost and efficiency requirements of electricity storage in a highly renewable European energy system
 
-Scripts used to create visualizations in the manuscript "Requirements and impacts of energy storage characteristics
+This repository includes the scripts and main results covered in the manuscript "Electricity storage cost and efficiency requirements
 in a highly renewable European energy system". 
 
 Download network files from Zenodo: XXXX and locate them in the networks folder. The networks folder in this repository contains:
@@ -13,3 +13,9 @@ Download network files from Zenodo: XXXX and locate them in the networks folder.
 - costs_2030.csv: csv file obtained with 'PyPSA/technology_data' for the year 2030.
 
 The Jupyter Notebook "Storage-X" directs to the functions creating the main figures of the manuscript.
+
+The results folder contains the results (.csv files) obtained with the "make_sspace.py" script. These include:
+- sspace_3888.csv: results obtained for the Electricity system with 3888 samples
+- sspace_w_sector_coupling_merged.csv: results obtained for the Electricity system, the Electricity + Heating + Land Transport system, and the Fully sector-coupled system based on 758 storage samples (+ additional 324 when allowing technologies with charge energy efficiency above unity)
+- simple_sweep/: folder with single-parametric sweeps for 2013 weather year
+- weather_sensitivity/: folder with single-parametric sweeps at variable weather years
