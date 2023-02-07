@@ -12,7 +12,7 @@ Download network files from Zenodo: XXXX and locate them in the networks folder.
 - solve_network.py: script for solving the network.
 - costs_2030.csv: csv file obtained with 'PyPSA/technology_data' for the year 2030.
 
-The Jupyter Notebook "Storage-X" directs to the functions creating the main figures of the manuscript.
+The Jupyter Notebook "Storage-X" directs to the functions creating the main figures of the manuscript. Before creating these visualizations, create the folder "figures" in which figures are saved.
 
 The results folder contains the results (.csv files) obtained with the "make_sspace.py" script. These include:
 - sspace_3888.csv: results obtained for the Electricity system with 3888 samples
