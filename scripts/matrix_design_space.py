@@ -4,16 +4,9 @@ Created on Wed Sep 14 12:51:26 2022
 
 @author: au485969
 """
-import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
-sns.set_theme(style="ticks")
 import numpy as np
-import matplotlib as mpl
 
-plt.close('all')
-
-# Plotting function
 def annotate(df, df1_update, output, nrows, ncols, var1, var2, var_name1, var_name2, ax, quantiles, q, normfactor, shading='auto', colormap="cool_r"):
     Z = df[output].values.reshape(nrows, ncols)
     x = np.arange(ncols) 
@@ -160,45 +153,31 @@ def read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency):
     
     return df1_update, MI_df
 
-#%%
-fs = 18
-plt.style.use('seaborn-ticks')
-plt.rcParams['axes.labelsize'] = fs
-plt.rcParams['xtick.labelsize'] = fs
-plt.rcParams['ytick.labelsize'] = fs
-plt.rcParams['xtick.direction'] = 'out'
-plt.rcParams['ytick.direction'] = 'out'
-plt.rcParams['axes.axisbelow'] = True
-
-sspace_og = pd.read_csv('../Results/sspace_w_sectorcoupling_merged.csv',index_col=0)
-# sspace_og = pd.read_csv('../Results/sspace_3888.csv',index_col=0)
-
-shading = 'nearest' # No interpolation or averaging
-# shading = 'flat' # The color represent the average of the corner values
-# shading='gouraud' # Gouraud: the color in the quadrilaterals is linearly interpolated
-
-omit_charge_efficiency = True # Omits charge efficiencies above 1 (Set to False to keep them in the figure)
-lock_tau = False # True
-
-cmap = "cool"
-# cmap = "spring_r"
-
-output = 'E_cor'
-# output = 'lc'
-# output = 'c_sys [bEUR]'
-
-normfactor = 2000 # what storage-X needs to provide in terms of cumulative storage energy capacity
-# normfactor = 2 # what storage-X needs to provide in terms of cumulative load coverage over a year
-# normfactor = 1
-#%% Loop over sectors
-# sectors = ['0','T-H','T-H-I-B']
-sectors = ['T-H-I-B']
-# quantiles = [0.06,0.12,0.15,0.18]
-quantiles = [0.25,0.50,0.75,1.00]
-figsiz = [16,16]
-for sector in sectors:
-    df1_update,MI_df = read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency)
+def plot_matrix(quantiles = [0.25,0.50,0.75,1.00], sector = 'T-H-I-B', threshold_E = 2000, omit_charge_efficiency = True, lock_tau = False, shading = 'nearest'):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    sns.set_theme(style="ticks")
+    import matplotlib as mpl
+    sspace_og = pd.read_csv('results/sspace_w_sectorcoupling_merged.csv',index_col=0)
+    # sspace_og = pd.read_csv('results/sspace_3888.csv',index_col=0)
     
+    shading = 'nearest' # No interpolation or averaging
+    # shading = 'flat' # The color represent the average of the corner values
+    # shading='gouraud' # Gouraud: the color in the quadrilaterals is linearly interpolated
+
+    cmap = "cool"
+    # cmap = "spring_r"
+    
+    output = 'E_cor'
+    # output = 'lc'
+    # output = 'c_sys [bEUR]'
+    
+    normfactor = threshold_E # 2000 # what storage-X needs to provide in terms of cumulative storage energy capacity
+    # normfactor = 2 # what storage-X needs to provide in terms of cumulative load coverage over a year
+    # normfactor = 1
+
+    figsiz = [16,16]
+    df1_update,MI_df = read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency)
     if output == 'c_sys [bEUR]':
         df1_update[output] = df1_update[output]/df1_update[output].max()
         MI_df['output'] = MI_df['output']/MI_df['output'].max()
@@ -281,20 +260,20 @@ for sector in sectors:
         # Capacity cost
         nrows = 4
         ncols = 4
-        im = annotate(df_cs, df1_update,output, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[q,0], quantiles=quantiles, q=q, normfactor=normfactor, shading=shading, colormap=cmap)
+        annotate(df_cs, df1_update,output, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[q,0], quantiles=quantiles, q=q, normfactor=normfactor, shading=shading, colormap=cmap)
         
         # Efficiency
         nrows = 3
         ncols = 3 if omit_charge_efficiency else 4 
-        im = annotate(df_etas, df1_update, output, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[q,1], quantiles=quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
+        annotate(df_etas, df1_update, output, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[q,1], quantiles=quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
         
         # Energy capacity cost vs discharge efficiency
         nrows = 3
         ncols = 7
-        im = annotate(df_chat_eta2, df1_update, output, nrows, ncols, var1='eta2',var2='c_hat',var_name1=r'$\hat{c}$' + ' [€/kWh]',var_name2=r'$\eta_d$'+ ' [-]', ax=ax[q,2], quantiles = quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
+        annotate(df_chat_eta2, df1_update, output, nrows, ncols, var1='eta2',var2='c_hat',var_name1=r'$\hat{c}$' + ' [€/kWh]',var_name2=r'$\eta_d$'+ ' [-]', ax=ax[q,2], quantiles = quantiles, q=q, normfactor=normfactor,shading=shading, colormap=cmap)
         
         q += 1
-   #%%    
+   
     cb_ax = fig.add_axes([0.95,0.12,0.02,0.12])
     cb_ax.tick_params(direction='out', length=6, width=2, colors='k',
                       grid_color='k', grid_alpha=1)   
@@ -312,12 +291,12 @@ for sector in sectors:
             norm = mpl.colors.BoundaryNorm(bounds, cmap4norm.N)
         
     cb = mpl.colorbar.ColorbarBase(cb_ax,orientation='vertical', cmap= plt.cm.get_cmap(cmap),norm=norm) #,ticks=bounds, boundaries=bounds) #ticks=[0.15,0.25,0.48,0.90])
-    cb.ax.tick_params(labelsize=fs)
+    cb.ax.tick_params(labelsize=18)
     
     if output == 'E_cor':
         cb.set_ticks([0,1000,1750])
         cb.ax.set_yticklabels(['$0$', '$1000$', r'$\geq 2000$'])
-        cb.set_label('$E$' + ' [GWh]', rotation=90,fontsize=fs,labelpad=16)
+        cb.set_label('$E$' + ' [GWh]', rotation=90,fontsize=18,labelpad=16)
     
     fig.text(0.9, 0.79, 
              'Q1', 
@@ -343,38 +322,36 @@ for sector in sectors:
              fontsize = 30,
              color = "grey")
     
-    fig.savefig('../figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '.png', dpi=300, bbox_inches='tight')
-
-
-#%% Make historgrams of "the remaining 3D space"
-
-# Coordinates in the matrix
-coord1 = 'c1'
-coord2 = 'c2'
-
-coord1s = df1_update[coord1].unique()
-coord1s.sort()
-coord2s = df1_update[coord2].unique()
-coord2s.sort()
-
-# Remaining 3D space
-MI_df.reset_index(inplace=True)
-MI_df.set_index([coord1,coord2],inplace=True)
-
-# Pick a point in the 2D grid:
-coords = [(coord1s[0],coord2s[0]),
-          (coord1s[1],coord2s[1]),
-          (coord1s[2],coord2s[2])] # in this case, the diagonal
-#%%
-if output == 'E_cor':
-    for coord in coords:
-        plt.figure()
-        sns.distplot(MI_df.loc[coord]['output'],kde=True).set(xlim=(0, MI_df.loc[coord]['output'].max()*1.05))
-        plt.axvline(MI_df.loc[coord]['output'].quantile(0.25,interpolation='nearest').item(),color='k',ls='--')
-        plt.axvline(MI_df.loc[coord]['output'].quantile(0.50,interpolation='nearest').item(),color='k',ls='--')
-        plt.axvline(MI_df.loc[coord]['output'].quantile(0.75,interpolation='nearest').item(),color='k',ls='--')
-        plt.axvline(MI_df.loc[coord]['output'].quantile(1,interpolation='nearest').item(),color='k',ls='--')
-        plt.title(coord,fontsize=fs)
-
-
-
+    fig.savefig('figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '.png', dpi=300, bbox_inches='tight')
+    
+    # #%% Make historgrams of "the remaining 3D space"
+    # # Coordinates in the matrix
+    # coord1 = 'c1'
+    # coord2 = 'c2'
+    
+    # coord1s = df1_update[coord1].unique()
+    # coord1s.sort()
+    # coord2s = df1_update[coord2].unique()
+    # coord2s.sort()
+    
+    # # Remaining 3D space
+    # MI_df.reset_index(inplace=True)
+    # MI_df.set_index([coord1,coord2],inplace=True)
+    
+    # # Pick a point in the 2D grid:
+    # coords = [(coord1s[0],coord2s[0]),
+    #           (coord1s[1],coord2s[1]),
+    #           (coord1s[2],coord2s[2])] # in this case, the diagonal
+    # #%%
+    # if output == 'E_cor':
+    #     for coord in coords:
+    #         plt.figure()
+    #         sns.distplot(MI_df.loc[coord]['output'],kde=True).set(xlim=(0, MI_df.loc[coord]['output'].max()*1.05))
+    #         plt.axvline(MI_df.loc[coord]['output'].quantile(0.25,interpolation='nearest').item(),color='k',ls='--')
+    #         plt.axvline(MI_df.loc[coord]['output'].quantile(0.50,interpolation='nearest').item(),color='k',ls='--')
+    #         plt.axvline(MI_df.loc[coord]['output'].quantile(0.75,interpolation='nearest').item(),color='k',ls='--')
+    #         plt.axvline(MI_df.loc[coord]['output'].quantile(1,interpolation='nearest').item(),color='k',ls='--')
+    #         plt.title(coord,fontsize=fs)
+    
+    
+    
