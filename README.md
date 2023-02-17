@@ -1,5 +1,7 @@
 # Storage-X - Cost and efficiency requirements of electricity storage in a highly renewable European energy system
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 This repository includes the scripts and main results covered in the manuscript "Electricity storage cost and efficiency requirements
 in a highly renewable European energy system". 
 
