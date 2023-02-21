@@ -21,3 +21,12 @@ The results folder contains the results (.csv files) obtained with the "make_ssp
 - sspace_w_sector_coupling_merged.csv: results obtained for the Electricity system, the Electricity + Heating + Land Transport system, and the Fully sector-coupled system based on 758 storage samples (+ additional 324 when allowing technologies with charge energy efficiency above unity)
 - simple_sweep/: folder with single-parametric sweeps for 2013 weather year
 - weather_sensitivity/: folder with single-parametric sweeps at variable weather years
+
+Clarificaiton of parameter names in the .csv files:
+- "eta1 [-]": charge energy efficiency 
+- "eta2 [-]": discharge energy efficiency
+- "c1": charge power capacity cost (EUR/kW_el)
+- "c2": discharge power capacity cost (EUR/kW_el)
+- "c_hat [EUR/kWh]": energy capacity cost
+- "tau [n_days]": self-discharge time
+
