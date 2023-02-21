@@ -22,7 +22,7 @@ The results folder contains the results (.csv files) obtained with the "make_ssp
 - simple_sweep/: folder with single-parametric sweeps for 2013 weather year
 - weather_sensitivity/: folder with single-parametric sweeps at variable weather years
 
-Clarificaiton of parameter names in the .csv files:
+Clarification of parameter names in the .csv files:
 - "eta1 [-]": charge energy efficiency 
 - "eta2 [-]": discharge energy efficiency
 - "c1": charge power capacity cost (EUR/kW_el)
