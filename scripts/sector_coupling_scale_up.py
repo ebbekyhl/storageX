@@ -25,10 +25,10 @@ plt.rcParams['ytick.direction'] = 'out'
 
 
 #%% Read data
-file = '../Results/sspace_w_sectorcoupling_merged.csv'
+file = '../Results/sspace_w_sectorcoupling_wo_duplicates.csv'
 # file = '../Results/sspace_3888.csv'
 
-if file == '../Results/sspace_w_sectorcoupling_merged.csv':
+if file == '../Results/sspace_w_sectorcoupling_wo_duplicates.csv':
     sectors = ['T-H-I-B','T-H','-']
     sector_names = ['Fully sector-coupled','Electricity + Heating\n+ Land Transport', 'Electricity']
 else:
@@ -46,7 +46,7 @@ LC_sector = pd.DataFrame(index=np.arange(1082))
 # Multivariate regression using GLM for all sectors
 i = 0
 for sector in sectors:
-    if file == '../Results/sspace_w_sectorcoupling_merged.csv':
+    if file == '../Results/sspace_w_sectorcoupling_wo_duplicates.csv':
         sspace = sspace_og.T
         sspace['sector'] = sspace['sector'].fillna('-')
         sspace = sspace.query('sector == @sector')

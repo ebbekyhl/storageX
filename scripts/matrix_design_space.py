@@ -158,7 +158,8 @@ def plot_matrix(quantiles = [0.25,0.50,0.75,1.00], sector = 'T-H-I-B', threshold
     import seaborn as sns
     sns.set_theme(style="ticks")
     import matplotlib as mpl
-    sspace_og = pd.read_csv('results/sspace_w_sectorcoupling_merged.csv',index_col=0)
+    
+    sspace_og = pd.read_csv('results/sspace_w_sectorcoupling_wo_duplicates.csv',index_col=0)
     # sspace_og = pd.read_csv('results/sspace_3888.csv',index_col=0)
     
     shading = 'nearest' # No interpolation or averaging

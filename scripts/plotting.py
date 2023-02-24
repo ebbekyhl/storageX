@@ -48,7 +48,7 @@ def rename_techs(label):
 
     rename_if_contains_dict = {
         "CHP CC":"heat-power CC",
-        "CHP":"CHP",
+        # "CHP":"CHP",
         #"nuclear":"nuclear",
         "water tanks": "hot water storage",
         "retrofitting": "building retrofitting",
@@ -62,10 +62,11 @@ def rename_techs(label):
         # "battery": "battery storage",
         "home battery":"battery",
         "biogas": "biomass",
-        "biomass": "biomass",
+        # "biomass": "biomass",
+        "solid biomass CHP":"biomass CHP",
         "air heat pump": "heat pump",
         "ground heat pump": "heat pump",
-        "gas": "gas",
+        # "gas": "gas",
         "process emissions CC": "CO2 capture",
         "DAC":"CO2 capture",
     }
@@ -81,7 +82,7 @@ def rename_techs(label):
         "onwind": "wind",
         "ror": "hydroelectricity",
         "hydro": "hydroelectricity",
-        "PHS": "hydroelectricity",
+        # "PHS": "hydroelectricity",
         "co2 Store": "CO2 capture",
         "co2 stored": "CO2 sequestration",
         "AC": "transmission lines",
@@ -113,6 +114,7 @@ def rename_techs(label):
 def rename_techs_tyndp(label):
     label = rename_techs(label)
     rename_if_contains_dict = {"H2 charging":'H2'}
+    rename_if_contains_dict = {"PHS charging":'PHS'}
     for old,new in rename_if_contains_dict.items():
         if old in label:
             label = new
@@ -238,7 +240,7 @@ def split_el_distribution_grid(supply,country,network):
     
     return supply
 
-def plot_series(network, country, dstart, dend, tech_colors, moving_average=1, carrier="AC"):
+def plot_series(network, country, dstart, dend, tech_colors, figsize=(8, 5), moving_average=1, carrier="AC"):
 
     n = network.copy()
     assign_location(n)
@@ -297,14 +299,15 @@ def plot_series(network, country, dstart, dend, tech_colors, moving_average=1, c
     # start = pd.Timestamp('2013-01-01')
     # stop = pd.Timestamp('2013-12-31')
 
-    threshold = 1e3
+    threshold = 2.5e3
 
     to_drop = supply.columns[(abs(supply) < threshold).all()]
-
+    # print(supply)
     if len(to_drop) != 0:
         print("dropping", to_drop)
         supply.drop(columns=to_drop, inplace=True)
-
+    # print(supply)
+    # print(supply['nuclear'])
     supply.index.name = None
 
     supply = supply / 1e3
@@ -321,13 +324,16 @@ def plot_series(network, country, dstart, dend, tech_colors, moving_average=1, c
                                 "industry demand",
                                 "heat pump",
                                 "resistive heater",
-                                "BEV",
                                 "H2 charging",
+                                "BEV",
+                                "battery charging",
+                                "PHS charging",
+                                "storage-X charging",
                                 "nuclear",
-                                "hydroelectricity",
                                 "wind",
                                 "solar PV",
                                 "solar rooftop",
+                                "hydroelectricity",
                                 "CHP",
                                 "CHP CC",
                                 "biomass",
@@ -347,7 +353,7 @@ def plot_series(network, country, dstart, dend, tech_colors, moving_average=1, c
     supply.index = pd.date_range('1/1/2013','1/1/2014',freq='3h')[0:-1]
 
     fig, ax = plt.subplots()
-    fig.set_size_inches((8, 5))
+    fig.set_size_inches(figsize)
 
     supply_temp = supply.rename(columns={'battery storage charging':'battery charging',
                                          'battery storage':'battery',
@@ -360,7 +366,18 @@ def plot_series(network, country, dstart, dend, tech_colors, moving_average=1, c
                    .append(supply.columns.difference(preferred_order)))
     
     supply_plot = supply.loc[start:stop,new_columns].rolling(moving_average).mean()
-    supply_plot['hydroelectricity charging'][supply_plot['hydroelectricity charging'] > 0] = 0
+    # supply_plot['hydroelectricity charging'][supply_plot['hydroelectricity charging'] > 0] = 0
+    
+    try:
+        supply_plot['transmission lines charging'][supply_plot['transmission lines charging'] > 0] = 0
+    except:
+        print('No transmission lines')
+    
+    try:
+        supply_plot['PHS charging'][supply_plot['PHS charging'] > 0] = 0
+    except:
+        print('No PHS')
+    
     try:
         supply_plot['storage-X charging'][supply_plot['storage-X charging'] > 0] = 0
     except:
@@ -397,14 +414,14 @@ def plot_series(network, country, dstart, dend, tech_colors, moving_average=1, c
     ax.grid(True)
     ax.set_ylabel("Power [GW]")
     
-    ydispl = -0.3 if 'BEV' in supply.columns else -0.2
+    ydispl = -0.35 if 'BEV' in supply.columns else -0.25
     
     fig.legend(new_handles, new_labels, ncol=3, 
                bbox_to_anchor=(0.15, ydispl), loc=3, frameon=True,prop={'size': 15},borderaxespad=0)
     
     fig.tight_layout()
 
-    return fig,supply
+    return ax,fig,supply
 
 def make_handler_map_to_scale_circles_as_in(ax, dont_resize_actively=False):
     fig = ax.get_figure()
@@ -723,7 +740,7 @@ def plot_investment_map(network, tech_colors, threshold=10,components=["links", 
 
     return fig
 
-def plot_storage_map(network, tech_colors, threshold=10,
+def plot_storage_map(network, sector, tech_colors, threshold=10,
              bus_size_factor=1e4, transmission=False):
    
     fig, ax = plt.subplots(subplot_kw={"projection": ccrs.PlateCarree()})
@@ -743,9 +760,9 @@ def plot_storage_map(network, tech_colors, threshold=10,
             capacity_c = ((df_c[attr])
                           .groupby([df_c.location, df_c.nice_group]).sum()
                           .unstack().fillna(0.))
-            try:
-                capacity_c = capacity_c.drop(columns=['coal','gas','uranium','oil','biomass'])
-            except:
+            if sector == '-T-H-I-B':
+                capacity_c = capacity_c.drop(columns=['coal','gas','uranium','oil','solid biomass'])
+            else:
                 capacity_c = capacity_c.drop(columns=['coal','gas','uranium'])
             
         else:

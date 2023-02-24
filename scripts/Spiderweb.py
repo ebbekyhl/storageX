@@ -246,7 +246,7 @@ def plot_spiderweb(scen = 'T-H-I-B', threshold_E = 2000, plot_ex = False, candid
     tau_SD_range_plot = (-0.1,1.01)
     
     ranges = [eta_d_range_plot, c_hat_range_plot, c_c_range_plot, eta_c_range_plot, tau_SD_range_plot, c_d_range_plot]           
-    sspace_new = pd.read_csv('results/sspace_w_sectorcoupling_merged.csv',index_col=0).fillna('0')
+    sspace_new = pd.read_csv('results/sspace_w_sectorcoupling_wo_duplicates.csv',index_col=0).fillna('0')
     csv = sspace_new.T.query('sector == @scen').drop(columns='sector').astype(float)
     
     csv['dt'] = csv['E [GWh]']/csv['G_discharge [GW]']

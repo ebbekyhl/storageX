@@ -8,8 +8,7 @@ Created on Mon Nov 28 14:19:41 2022
 def investment_map(networks_opt, scen, moving_average, tech_colors):
     from scripts.plotting import plot_investment_map
     import pypsa 
-    import matplotlib.pyplot as plt
-    plt.close('all')
+    # import matplotlib.pyplot as plt
     
     networks_path = networks_opt['path']
     wyear = networks_opt['wyear']
@@ -23,11 +22,9 @@ def investment_map(networks_opt, scen, moving_average, tech_colors):
     fig_investment = plot_investment_map(n, tech_colors, threshold=10,bus_size_factor=4.3e10)
     fig_investment.savefig('figures/Investment_map' + scen + '_eta_d_factor' + eta2 + '.png',bbox_inches="tight",dpi=600)
 
-def storage_map(networks_opt, scen, moving_average, tech_colors):
+def storage_map(networks_opt, scen, tech_colors):
     from scripts.plotting import plot_storage_map
-    import pypsa 
-    import matplotlib.pyplot as plt
-    plt.close('all')
+    import pypsa
     
     networks_path = networks_opt['path']
     wyear = networks_opt['wyear']
@@ -38,58 +35,8 @@ def storage_map(networks_opt, scen, moving_average, tech_colors):
     chat = networks_opt['chat']
     
     n = pypsa.Network(networks_path + 'elec_s_y' + wyear + '_n37_lv1.0__Co2L0.05-3H' + scen +'-solar+p3-dist1-X Charge+e' + eta1 + '-X Charge+c' + c1 + '-X Discharge+e' + eta2 + '-X Discharge+c' + c2 + '-X Store+c' + chat + '.nc')
-    fig_storage = plot_storage_map(n, tech_colors, threshold=10,bus_size_factor=1e6)
+    fig_storage = plot_storage_map(n, scen, tech_colors, threshold=10,bus_size_factor=1e6)
     fig_storage.savefig('figures/Storage_capacity_map' + scen + '_eta_d_factor' + eta2 + '.png',bbox_inches="tight",dpi=600)
-
-def temporal(networks_opt, scen, moving_average, tech_colors):
-    from scripts.plotting import plot_series
-    import pandas as pd
-    import pypsa 
-    import matplotlib.pyplot as plt
-    plt.close('all')
-    
-    SOC_X = {}
-    discharge_t_X = {}
-    SOC_bat = {}
-    discharge_t_bat = {}
-    
-    moving_average_steps = moving_average
-    
-    networks_path = networks_opt['path']
-    wyear = networks_opt['wyear']
-    eta1 = networks_opt['eta1']
-    eta2 = networks_opt['eta2']
-    c1 = networks_opt['c1']
-    c2 = networks_opt['c2']
-    chat = networks_opt['chat']
-    
-    # Moving average equal to, e.g, 24 takes the first 24 values (with 3-hourly resoulution, this is equivalent to a 3-daily moving average)
-    global_constraint = {}
-    # for scen in scens:
-    n = pypsa.Network(networks_path + 'elec_s_y' + wyear + '_n37_lv1.0__Co2L0.05-3H' + scen +'-solar+p3-dist1-X Charge+e' + eta1 + '-X Charge+c' + c1 + '-X Discharge+e' + eta2 + '-X Discharge+c' + c2 + '-X Store+c' + chat + '.nc')
-    global_constraint[scen] = n.global_constraints.loc['CO2Limit']
-    
-    c = 'EU'
-    fig_AC_1year,supply = plot_series(n,country=c,dstart=pd.to_datetime('1/1/2013'),dend=pd.to_datetime('31/12/2013'),tech_colors=tech_colors,moving_average=moving_average_steps,carrier="AC")
-    fig_AC_1year.savefig('figures/Timeseries_' + scen + '_eta_d_factor' + eta2 + '_' + c + '.png',bbox_inches="tight",dpi=600)
-
-    dstart = pd.to_datetime('1/20/2013')
-    dend = pd.to_datetime('3/1/2013')
-    
-    fig_AC_worst,supply = plot_series(n,country=c,dstart=dstart,dend=dend,tech_colors=tech_colors,moving_average=moving_average_steps,carrier="AC")
-    fig_AC_worst.savefig('figures/Timeseries_worst_week' + scen + '_eta_d_factor' + eta2 + '_' + c +  '.png',bbox_inches="tight",dpi=600)
-
-    # State-of-charge for storage-X
-    SOC_X[scen] = n.stores_t.e[n.stores.query('carrier == "X"').index].sum(axis=1)/n.stores_t.e[n.stores.query('carrier == "X"').index].sum(axis=1).max()
-    # Dispatch of storage-X
-    discharge_t_X[scen] = -n.links_t.p1[n.links.query('carrier == "X Discharge"').index].sum(axis=1)/(-n.links_t.p1[n.links.query('carrier == "X Discharge"').index].sum(axis=1)).max()
-    
-    # State of charge for battery
-    SOC_bat[scen] = n.stores_t.e[n.stores.query('carrier == "battery"').index].sum(axis=1)/n.stores_t.e[n.stores.query('carrier == "battery"').index].sum(axis=1).max()
-    # Dispatch of battery
-    discharge_t_bat[scen] = -n.links_t.p1[n.links.query('carrier == "battery discharger"').index].sum(axis=1)/-n.links_t.p1[n.links.query('carrier == "battery discharger"').index].sum(axis=1).max()
-
-    return [fig_AC_1year, fig_AC_worst]
 
 def state_of_charge(networks_opt, scen):
     import matplotlib.pyplot as plt
@@ -132,3 +79,116 @@ def state_of_charge(networks_opt, scen):
     SOC_bat[scen].plot(ax=ax3,label=scen_dic[scen],linewidth=0.5)
     discharge_t_bat[scen].plot(ax=ax4,label=scen_dic[scen])
     plt.legend()
+    
+
+#%%
+# import warnings
+# warnings.filterwarnings("ignore")
+# import yaml
+# import matplotlib.pyplot as plt
+# import pandas as pd
+# # import numpy as np
+
+# tech_colors_path = 'tech_colors.yaml'
+
+# fs = 18
+# plt.style.use('seaborn-ticks')
+# plt.rcParams['axes.labelsize'] = fs
+# plt.rcParams['xtick.labelsize'] = fs
+# plt.rcParams['ytick.labelsize'] = fs
+# plt.rcParams['xtick.direction'] = 'out'
+# plt.rcParams['ytick.direction'] = 'out'
+# plt.rcParams['axes.axisbelow'] = True
+
+# with open(tech_colors_path) as file:
+#     tech_colors = yaml.safe_load(file)['tech_colors']
+# tech_colors['CO2 capture'] = tech_colors['DAC']
+# tech_colors['domestic demand'] = '#050000'
+# tech_colors['industry demand'] = '#423737'
+# tech_colors['BEV'] = '#dffc03'
+# tech_colors['EV battery'] = '#dffc03'
+# tech_colors['heat pump'] = '#b52f2f'
+# tech_colors['resistive heater'] = '#c45c5c'
+# tech_colors['V2G'] = '#38f2d9'
+# tech_colors['transmission lines'] = '#6c9459'
+# tech_colors['storage-X'] = '#610555'
+# tech_colors['storage X'] = '#610555'
+# tech_colors['X'] = '#610555'
+# tech_colors['pumped hydro'] = '#53c7ba'
+# tech_colors['PHS'] = '#53c7ba'
+# tech_colors['biomass CHP CC'] = '#211408' # "#6e441c"
+# tech_colors['gas CHP CC'] = '#211508' # "#6e441c"
+
+# networks_opt = {'path':'../networks/high_efficiency/',
+#                 'wyear': '2003', 
+#                 'eta1':'1.0', 
+#                 'eta2':'1.9',
+#                 'c1':'1.0', 
+#                 'c2':'1.0', 
+#                 'chat':'0.15'} # Check which network configurations are available in your path
+
+# # scen=''
+# scen='-T-H-I-B'
+# moving_average=8 #*7
+
+
+#%%
+
+def temporal(networks_opt, scen, moving_average, tech_colors):
+    from scripts.plotting import plot_series
+    import pandas as pd
+    import pypsa 
+    # import matplotlib.pyplot as plt
+    
+    SOC_X = {}
+    discharge_t_X = {}
+    SOC_bat = {}
+    discharge_t_bat = {}
+    
+    moving_average_steps = moving_average
+    
+    networks_path = networks_opt['path']
+    wyear = networks_opt['wyear']
+    eta1 = networks_opt['eta1']
+    eta2 = networks_opt['eta2']
+    c1 = networks_opt['c1']
+    c2 = networks_opt['c2']
+    chat = networks_opt['chat']
+    
+    # Moving average equal to, e.g, 24 takes the first 24 values (with 3-hourly resoulution, this is equivalent to a 3-daily moving average)
+    global_constraint = {}
+    # for scen in scens:
+    n = pypsa.Network(networks_path + 'elec_s_y' + wyear + '_n37_lv1.0__Co2L0.05-3H' + scen +'-solar+p3-dist1-X Charge+e' + eta1 + '-X Charge+c' + c1 + '-X Discharge+e' + eta2 + '-X Discharge+c' + c2 + '-X Store+c' + chat + '.nc')
+    global_constraint[scen] = n.global_constraints.loc['CO2Limit']
+    
+    c = 'EU'
+    ax_AC_1year, fig_AC_1year, supply = plot_series(n,country=c,dstart=pd.to_datetime('1/1/2013'),dend=pd.to_datetime('31/12/2013'),tech_colors=tech_colors,moving_average=moving_average_steps,carrier="AC")
+    fig_AC_1year.savefig('figures/Timeseries_' + scen + '_eta_d_factor' + eta2 + '_' + c + '.png',bbox_inches="tight",dpi=600)
+    
+    # dstart = pd.to_datetime('2/11/2013')
+    # dend = pd.to_datetime('2/14/2013')
+    # 
+    dstart = pd.to_datetime('2/10/2013')
+    dend = pd.to_datetime('2/17/2013')
+    
+    ax_AC_worst, fig_AC_worst,supply = plot_series(n,country=c,dstart=dstart,dend=dend,tech_colors=tech_colors,moving_average=1,carrier="AC")
+    # figsize=(3,5)
+    
+    if scen == '':
+        ax_AC_worst.set_ylim([-600, 600])
+    else:
+        ax_AC_worst.set_ylim([-2100, 2100])
+    
+    fig_AC_worst.savefig('figures/Timeseries_worst_week' + scen + '_eta_d_factor' + eta2 + '_' + c +  '.png',bbox_inches="tight",dpi=600)
+    
+    # State-of-charge for storage-X
+    SOC_X[scen] = n.stores_t.e[n.stores.query('carrier == "X"').index].sum(axis=1)/n.stores_t.e[n.stores.query('carrier == "X"').index].sum(axis=1).max()
+    # Dispatch of storage-X
+    discharge_t_X[scen] = -n.links_t.p1[n.links.query('carrier == "X Discharge"').index].sum(axis=1)/(-n.links_t.p1[n.links.query('carrier == "X Discharge"').index].sum(axis=1)).max()
+    
+    # State of charge for battery
+    SOC_bat[scen] = n.stores_t.e[n.stores.query('carrier == "battery"').index].sum(axis=1)/n.stores_t.e[n.stores.query('carrier == "battery"').index].sum(axis=1).max()
+    # Dispatch of battery
+    discharge_t_bat[scen] = -n.links_t.p1[n.links.query('carrier == "battery discharger"').index].sum(axis=1)/-n.links_t.p1[n.links.query('carrier == "battery discharger"').index].sum(axis=1).max()
+    
+    # return fig_AC_worst

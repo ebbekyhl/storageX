@@ -35,10 +35,10 @@ def scatter_hist(x, y, ax_histx, ax_histy, binwidth_factor = 0.05):
     bins = np.arange(-lim, lim + binwidth, binwidth)
     ax_histy.hist(y, orientation='horizontal',color='grey', bins=bins)
 
-def plot_scatter(sector='T-H-I-B',color_acc_to='RTE',omit_high_eta1s=True):
+def plot_scatter(sector='T-H-I-B',x='LC',color_acc_to='RTE',binwidth_factor = 0.05, omit_high_eta1s=True):
     color = color_acc_to
     # filename = 'results/sspace_3888.csv' (does not include sector-coupling)
-    filename = 'results/sspace_w_sectorcoupling_merged.csv'
+    filename = 'results/sspace_w_sectorcoupling_wo_duplicates.csv'
     df = pd.read_csv(filename,index_col=0).fillna(0)
     df_T = df.T
     df_T = df_T.query('sector == @sector').drop(columns='sector').astype(float)
@@ -51,18 +51,20 @@ def plot_scatter(sector='T-H-I-B',color_acc_to='RTE',omit_high_eta1s=True):
     threshold_E = 0 # TWh
     
     # For "E" on the x-axis, uncomment this:
-    var = 'E [GWh]'
-    var_str = 'E'
-    yval = 'E'
+    if x == 'E':
+        var = 'E [GWh]'
+        var_str = 'E'
+        yval = 'E'
     
-    # For "LC" on the x-axis, uncomment this: 
-    # yval = 'lc'
-    # if filename == 'results/sspace.csv' or filename == 'results/sspace_3888.csv':
-    #     var = 'load_shift [%]'
-    #     var_str = 'load_shift'
-    # else:
-    #     var = 'load_coverage [%]'
-    #     var_str = 'load_coverage'
+    elif x == 'LC':
+        yval = 'lc'
+        
+        if filename == 'results/sspace.csv' or filename == 'results/sspace_3888.csv':
+            var = 'load_shift [%]'
+            var_str = 'load_shift'
+        else:
+            var = 'load_coverage [%]'
+            var_str = 'load_coverage'
     
     df.loc['E [GWh]'] = df.loc['E [GWh]']*df.loc['eta2 [-]']/1000
     x = df[df.loc['E [GWh]'][df.loc['E [GWh]'] > threshold_E].index]
@@ -112,14 +114,13 @@ def plot_scatter(sector='T-H-I-B',color_acc_to='RTE',omit_high_eta1s=True):
         else:
             if t == 'c_sys [bEUR]':
                 gen_tech_rel_thres = x.loc[t]/df.loc[t].loc[r_111111.T.index].unique()[0]
-                
             else:
                 gen_tech_rel_thres = x.loc[t]
     
         lc_thres = x.loc[var]
         c_c = x.loc['c1']
-        # c_d = x.loc['c2']
-        # c_hat = x.loc['c_hat [EUR/kWh]']
+        c_d = x.loc['c2']
+        c_hat = x.loc['c_hat [EUR/kWh]']
         
         ax = plt.subplot(gs[1:,0:-1])
         ax.grid()
@@ -134,16 +135,27 @@ def plot_scatter(sector='T-H-I-B',color_acc_to='RTE',omit_high_eta1s=True):
             for X2 in x_eta2['eta1 [-]'].unique():
                 x_eta1 = x_eta2.groupby(x.T['eta1 [-]']).get_group(X2)
                 RTE = X1*X2
-                if color == 'RTE':
-                    color_var = RTE/(0.95*0.95) # Color according to round-trip efficiency
                 
                 # color_var = X1/0.95 # Color according to discharge efficiency
                 # color_var = X2/0.95 # Color according to discharge efficiency
                 # color_var = c_hat.loc[x_eta1.index]/40  # Color according to energy capacity cost
                 # color_var = c_d.loc[x_eta1.index]/700  # Color according to discharge capacity cost
                 
-                if color == 'c_c':
-                    color_var = c_c.loc[x_eta1.index]/700  # Color according to charge capacity cost
+                # if color == 'RTE':
+                #     color_var = RTE/(0.95*0.95) # Color according to round-trip efficiency
+                
+                # if color == 'c_c':
+                #     color_var = c_c.loc[x_eta1.index]/700  # Color according to charge capacity cost
+                
+                # if color == 'c_hat':
+                #     color_var = c_c.loc[x_eta1.index]/700  # Color according to charge capacity cost
+                
+                color_vars = {'RTE':RTE/(0.95*0.95),
+                              'c_c':c_c.loc[x_eta1.index]/700,
+                              'c_d':c_c.loc[x_eta1.index]/700,
+                              'c_hat':c_hat.loc[x_eta1.index]/40}
+                
+                color_var = color_vars[color]
                 
                 gen_tech_rel_y = y_plot.loc[x_eta1.index] 
                 lc_x = x_eta1[var] 
@@ -151,12 +163,14 @@ def plot_scatter(sector='T-H-I-B',color_acc_to='RTE',omit_high_eta1s=True):
                 color1 = cmap1(color_var)
                 # ax.scatter(lc_x,gen_tech_rel_y,marker='s',s=10,color=color1,zorder=1000-RTE)
                 # ax.scatter(lc_x,gen_tech_rel_y,marker=marker_dic1[RTE],s=20,color=color1,zorder=1000-RTE)
-                if color == 'c_c':
+                
+                if color == 'RTE':
+                    ax.scatter(lc_x,gen_tech_rel_y,marker='s',s=10,color=color1,zorder=1000-RTE)
+                
+                else:
                     for j in range(len(lc_x)):
                         ax.scatter(lc_x.iloc[j],gen_tech_rel_y.iloc[j],marker='s',s=10, zorder=color_var.iloc[j],color=color1[j]) 
-                else:
-                    ax.scatter(lc_x,gen_tech_rel_y,marker='s',s=10,color=color1,zorder=1000-RTE)
-        
+                
                 it += 1
                 
         cb_ax = fig.add_axes([0.90,0.11,0.02,0.3])
@@ -164,20 +178,32 @@ def plot_scatter(sector='T-H-I-B',color_acc_to='RTE',omit_high_eta1s=True):
         
         if color == 'RTE':
             cmap = mpl.cm.summer_r
-        if color == 'c_c':
+        else:
             cmap = mpl.cm.summer
         
         cmaplist = [cmap(i) for i in range(cmap.N)]
         cmap = mpl.colors.LinearSegmentedColormap.from_list('Custom cmap', cmaplist, cmap.N)
     
         # define the bins and normalize
-        if color == 'c_c':
-            RTEs = x.loc['c1'].unique()
-            RTEs.sort()
-            fig.text(0.91, 0.45, r'$c_c$',fontsize=15)
+        
+        varnames_dic = {'c_c':'c1',
+                        'c_d':'c2',
+                        'c_hat':'c_hat [EUR/kWh]',
+                        'eta_c':'eta1 [-]',
+                        'eta_d':'eta2 [-]'}
+        
         if color == 'RTE':
             fig.text(0.91, 0.45, r'RTE [%]',fontsize=15)
             RTEs = RTEs*100
+        else:
+            RTEs = x.loc[varnames_dic[color]].unique()
+            RTEs.sort()
+            fig.text(0.91, 0.45, color,fontsize=15)
+        
+        # else:
+        #     RTEs = x.loc[color].unique()
+        #     RTEs.sort()
+        #     fig.text(0.91, 0.45, color,fontsize=15)
         bounds = [0] + list(RTEs.astype(int))
         
         norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
@@ -190,7 +216,7 @@ def plot_scatter(sector='T-H-I-B',color_acc_to='RTE',omit_high_eta1s=True):
         ax_histx = plt.subplot(gs[0:1,0:-1],sharex=ax)
         ax_histy = plt.subplot(gs[1:,-1],sharey=ax)
         
-        scatter_hist(x_plot, y_plot, ax_histx, ax_histy) # <---------------- This one takes quite a while to compute
+        scatter_hist(x_plot, y_plot, ax_histx, ax_histy, binwidth_factor) # <---------------- This one takes quite a while to compute
         
         ax_histx.spines['bottom'].set_visible(False)
         ax_histx.spines['top'].set_visible(False)
@@ -212,9 +238,14 @@ def plot_scatter(sector='T-H-I-B',color_acc_to='RTE',omit_high_eta1s=True):
             ax.set_xlim([-3,70])
             
         ax.set_ylim(ylims[(t,sector)])
-        if color == 'c_c':
+        
+        if color == 'RTE':
+            fig.savefig('figures/scatter_plot_' + t + '_' + yval + '_' + str(sector) + '.png', transparent=False,
+                        bbox_inches="tight",dpi=300)
+        elif color == 'c_c':
             fig.savefig('figures/scatter_plot_' + t + '_' + yval + str(sector) + '_c_c.png', transparent=False,
                         bbox_inches="tight",dpi=300)
         else:
-            fig.savefig('figures/scatter_plot_' + t + '_' + yval + '_' + str(sector) + '.png', transparent=False,
+            fig.savefig('figures/scatter_plot_' + t + '_' + yval + str(sector) + '_' + color + '.png', transparent=False,
                         bbox_inches="tight",dpi=300)
+        

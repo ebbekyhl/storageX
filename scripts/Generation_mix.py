@@ -19,7 +19,7 @@ import pandas as pd
 def plot_generation_mix(tech_colors,sector):
 
     # Read result configurations
-    filename = 'results/sspace_w_sectorcoupling_merged.csv'
+    filename = 'results/sspace_w_sectorcoupling_wo_duplicates.csv'
     df = pd.read_csv(filename,index_col=0).fillna(0)
     df_T = df.T
     df_T = df_T.query('sector == @sector').drop(columns='sector').astype(float)
@@ -95,29 +95,19 @@ def plot_generation_mix(tech_colors,sector):
                       ]].T.sum(axis=1)
     
     # Storage configurations
-    # x_low = df[df.loc['E [GWh]'].idxmin()]
     x = df[df.loc['E [GWh]'][df.loc['E [GWh]'] > threshold_E].index]
     
     lw_raw = 0.2
     
-    # Plotting
-    # for x_var in x_vars:
-    # fig = plt.figure(figsize=(12, 14))
     fig = plt.figure(figsize=(8, 14))
     nrows = 4 # 6
     ncols = 5
     gs = gridspec.GridSpec(nrows, ncols)
-    # gs.update(wspace=0)
     gs.update(hspace=0.5)
-    # cp = plt.rcParams['axes.prop_cycle'].by_key()['color']
-    # ax = plt.subplot(gs[3:,:])
-    ax1 = plt.subplot(gs[0:2,:]) #,sharex=ax)
+    ax1 = plt.subplot(gs[0:2,:])
     ax2 = plt.subplot(gs[2:4,:])
-    # ax3 = plt.subplot(gs[2:3,:])
-    # fig, ax = plt.subplots(figsize=[8,8])
     x_vardic = {'E [GWh]':'E','E_cor [TWh]':'E_cor [TWh]','G_discharge [GW]':'G_d','G_charge [GW]':'G_c','load_coverage [%]':'load_coverage','c_hat [EUR/kWh]':'chat'}
     x_vardic1 = {'E [GWh]':'E [GWh]','E_cor [TWh]':'E_cor [TWh]','G_discharge [GW]':'G_d [GW]','G_charge [GW]':'G_c [GW]','load_coverage [%]':'load coverage ' + r'$LC$' + ' [%]','c_hat [EUR/kWh]':'chat'}
-    
     df_plot = pd.DataFrame()
     df_plot['tot'] = gen_tot.loc[x.T.index]
     df_plot['OCGT'] = x.loc['gas_OCGT_gen [MWh]']#/df_plot['tot']*100
@@ -127,7 +117,6 @@ def plot_generation_mix(tech_colors,sector):
     df_plot['coal'] = x.loc['coal_gen [MWh]']
     df_plot['gas CHP CC'] = x.loc['gas_CHP_CC_gen [MWh]']
     df_plot['gas CHP'] = x.loc['gas_CHP_gen [MWh]']
-    # df_plot['gas'] = x.loc['gas_OCGT_gen [MWh]'] + x.loc['gas_CCGT_gen [MWh]']
     df_plot['OCGT'] = x.loc['gas_OCGT_gen [MWh]']
     df_plot['CCGT'] = + x.loc['gas_CCGT_gen [MWh]']
     df_plot['nuclear'] = x.loc['nuclear_gen [MWh]']
@@ -203,14 +192,11 @@ def plot_generation_mix(tech_colors,sector):
     df_caps['LC'] = x.loc['load_coverage [%]']
     df_caps['x'] = x.loc[x_var]
     df_caps.sort_values(by = 'x',inplace=True)
-    
     df_caps.set_index('x',inplace=True)
-    
     #%% 
     fig_gen, ax_gen = plt.subplots()
     ax_gen.stackplot(df_plot.drop(columns=['tot']).index,df_plot.drop(columns=['tot']).T/1e6,colors=[tech_colors[str(i)] for i in list(df_plot.drop(columns=['tot']).columns)],labels=[str(i) for i in list(df_plot.drop(columns=['tot']).columns)],lw=0)
     #%%
-    # xlims = ax_gen.get_xlim()
     ax_gen.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
     ax_gen.set_ylim([0,8500])
     ax_gen.set_xlabel('Storage ' + x_vardic1[x_var])
@@ -225,10 +211,6 @@ def plot_generation_mix(tech_colors,sector):
         fig_gen.legend(bbox_to_anchor=(1.05, -0.05),ncol=3,prop={'size':18},frameon=True)
     fig_gen.savefig('figures/Actual_generation mix_' + x_vardic[x_var] + '_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
     
-    # ax_gen.plot(df_caps['solar'],color=tech_colors['solar'],lw=lw_raw,alpha=0.5)
-    # ax_gen.plot(df_caps['wind'],color=tech_colors['onwind'],lw=lw_raw,alpha=0.5)
-    # ax_gen.plot((df_caps['solar'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors['solar'],lw=2,label='solar')
-    # ax_gen.plot((df_caps['wind'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors['onwind'],lw=2,label='wind')
     #%%
     if df_caps['gas_CHP_CC'].max() > 1:
         ax1.plot(df_caps['gas_CHP_CC'],color=tech_colors['gas CHP CC'],lw=lw_raw,alpha=0.5)
@@ -264,15 +246,7 @@ def plot_generation_mix(tech_colors,sector):
     ax2.plot((df_lc['X_power'].rolling(rolling_interval).mean()),color=tech_colors['storage X'],lw=2,label='Storage-X')
     
     ax1.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
-    # ax.set_xticklabels([])
-    
-    # ax.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
-    # ax.set_xticklabels([])
-    # 
-    # ax.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
-    # ax3.set_xticklabels([])
-    
-    # ax.set_ylabel('Baseload power \n capacities [GW]')
+
     ax1.set_ylabel('Backup power \n capacities [GW]')
     ax2.set_ylabel('Storage discharge \n capacities [GW]')
     ax1.set_xlabel('Storage-X Energy capacity [TWh]')
@@ -311,10 +285,14 @@ def plot_generation_mix(tech_colors,sector):
     solar_share = df_plot['solar']/df_plot['tot']*100
     hydro_share = df_plot['hydro']/df_plot['tot']*100
     
+    wind_std = wind_share.std() # sample standard deviation (Normalized by N-1 by default)
+    solar_std = solar_share.std() # sample standard deviation (Normalized by N-1 by default)
+    hydro_std = hydro_share.std() # sample standard deviation (Normalized by N-1 by default)
+    
     print('Sector: ' + str(sector))
-    print('Wind: ' + str(round(wind_share.mean(),1)) + ' pm ' + str(round(wind_share.std(),1)))
-    print('Solar: ' + str(round(solar_share.mean(),1)) + ' pm ' + str(round(solar_share.std(),1)))
-    print('Hydro: ' + str(round(hydro_share.mean(),1)) + ' pm ' + str(round(hydro_share.std(),1)))
+    print('Wind: ' + str(round(wind_share.mean(),1)) + ' pm ' + str(round(1.96*wind_std,1))) # 1.96*std represents 95% confidence 
+    print('Solar: ' + str(round(solar_share.mean(),1)) + ' pm ' + str(round(1.96*solar_std,1))) # 1.96*std represents 95% confidence
+    print('Hydro: ' + str(round(hydro_share.mean(),1)) + ' pm ' + str(round(1.96*hydro_std,1))) # 1.96*std represents 95% confidence
     #%%
     # if x_var == 'load_coverage [%]':
     #     fig,ax = plt.subplots(figsize=[10,5])
