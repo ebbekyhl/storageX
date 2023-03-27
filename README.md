@@ -5,13 +5,19 @@
 This repository includes the scripts and main results covered in the manuscript ["_Cost and efficiency requirements for a successful electricity storage
 in a highly renewable European energy system_"](https://doi.org/10.48550/arXiv.2208.09169). 
 
+The study aims to investigate what a generic long-duration storage technology need to be attributed with in terms of capacity costs and efficiencies. Existing storage options show different characteristics:
+
 ![panel_fig1](existing_sketch_all.png)
+
+We use the energy system model __PyPSA-Eur-Sec__ to derive the unique combinations that entail a substantial optimal storage deployment:
 
 ![panel_fig2](Spiderweb_result_0_w_TES_[2]_E_cor_Nperf6_w_legend.png)
 
+Subsequently, we list design strategies that storage tech developers can use as a crosshair for further development:
+
 ![panel_fig3](figure_panel_requirement.png)
 
-Download network files from Zenodo: XXXX (will be available upon publication) and locate them in the networks folder. The networks folder in this repository contains:
+To recreate the figures, the network files containing all data from the energy system model can be acquired from Zenodo: XXXX (will be available upon publication). The The `networks/` folder in this repository contains:
 
 - `config.yaml`: file used in PyPSA-Eur-Sec to calculate the scenarios with the storage-X sample space as input.
 - `snakefile`: snakemake rules to prepare, solve, and postprocess the networks.
