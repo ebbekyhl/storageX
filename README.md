@@ -5,7 +5,11 @@
 This repository includes the scripts and main results covered in the manuscript "Electricity storage cost and efficiency requirements
 in a highly renewable European energy system". 
 
-![panel_fig](figures/figure_panel_requirement.png)
+![panel_fig1](Existing_sketch_all.pdf)
+
+![panel_fig2](Spiderweb_result_0_w_TES_[2]_E_cor_Nperf6_w_legend.png)
+
+![panel_fig3](figure_panel_requirement.png)
 
 Download network files from Zenodo: XXXX (will be available upon publication) and locate them in the networks folder. The networks folder in this repository contains:
 
