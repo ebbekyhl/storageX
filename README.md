@@ -5,7 +5,7 @@
 This repository includes the scripts and main results covered in the manuscript ["_Cost and efficiency requirements for a successful electricity storage
 in a highly renewable European energy system_"](https://doi.org/10.48550/arXiv.2208.09169). 
 
-![panel_fig1](Existing_sketch_all.png)
+![panel_fig1](existing_sketch_all.png)
 
 ![panel_fig2](Spiderweb_result_0_w_TES_[2]_E_cor_Nperf6_w_legend.png)
 
