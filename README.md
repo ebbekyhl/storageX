@@ -26,7 +26,7 @@ To recreate the figures, the network files containing all data from the energy s
 - `solve_network.py`: script for solving the network.
 - `costs_2030.csv`: csv file obtained with 'PyPSA/technology_data' for the year 2030.
 
-The Jupyter Notebook "Storage-X" directs to the functions creating the main figures of the manuscript. Before creating these visualizations, create the folder "figures" in which figures are saved.
+The Jupyter Notebook "Storage-X" directs to the functions creating the main figures in the manuscript.
 
 The results folder contains the results (.csv files) obtained with the "make_sspace.py" script. These include:
 - `sspace_3888.csv`: results obtained for the Electricity system with 3888 samples
@@ -35,10 +35,9 @@ The results folder contains the results (.csv files) obtained with the "make_ssp
 - `weather_sensitivity/`: folder with single-parametric sweeps at variable weather years
 
 Clarification of parameter names in the .csv files:
-- "_eta1 [-]_": charge energy efficiency 
-- "_eta2 [-]_": discharge energy efficiency
-- "_c1_": charge power capacity cost (EUR/kW_el)
-- "_c2_": discharge power capacity cost (EUR/kW_el)
-- "_c_hat [EUR/kWh]_": energy capacity cost
-- "_tau [n_days]_": self-discharge time
-
+- "**eta1 [-]**": charge energy efficiency 
+- "**eta2 [-]**": discharge energy efficiency
+- "**c1**": charge power capacity cost (EUR/kW_el)
+- "**c2**": discharge power capacity cost (EUR/kW_el)
+- "**c_hat [EUR/kWh]**": energy capacity cost
+- "**tau [n_days]**": self-discharge time
