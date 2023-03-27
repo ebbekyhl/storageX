@@ -1,4 +1,4 @@
-# Storage-X - Cost and efficiency requirements of electricity storage in a highly renewable European energy system
+# Storage-X - Cost and efficiency requirements for a successful electricity storage in a highly renewable European energy system
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
