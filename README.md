@@ -5,7 +5,7 @@
 This repository includes the scripts and main results covered in the manuscript ["_Cost and efficiency requirements for a successful electricity storage
 in a highly renewable European energy system_"](https://doi.org/10.48550/arXiv.2208.09169). 
 
-The study aims to investigate what a generic long-duration storage technology need to be attributed with in terms of capacity costs and efficiencies. Existing storage options show different characteristics:
+The study aims to investigate what a cost-competitive long-duration storage technology need to be attributed with, in terms of capacity costs and efficiencies. Existing storage options show different characteristics:
 
 ![panel_fig1](existing_sketch_all.png)
 
