@@ -149,9 +149,9 @@ def single_parametric_sweep(variable='E'):
     sms = sm + sm3
     
     fig1.legend([sms[0],sms[3],sms[1],sms[4],sms[2],sms[5]],
-                 ['Electricity 2013','Electricity (2002-2010)',
-                  'Electricity + Heating + Land Transport 2013','Electricity + Heating + Land Transport (2002-2010)',
-                  'Fully sector-coupled 2013','Fully sector-coupled (2002-2010)'], bbox_to_anchor=(0, -0.10), loc=3,
+                 ['Electricity (SC1) 2013','Electricity (2002-2010)',
+                  'Electricity + Heating + Land Transport (SC2) 2013','Electricity + Heating + Land Transport (2002-2010)',
+                  'Fully sector-coupled (SC3) 2013','Fully sector-coupled (2002-2010)'], bbox_to_anchor=(0, -0.10), loc=3,
                 ncol=3,frameon=True,prop={'size': fs},borderaxespad=0)
     
     fig1.tight_layout() 

@@ -48,8 +48,8 @@ def plot_generation_mix(tech_colors,sector):
                    'nuclear_gen [MWh]','cap_nuclear [GW]',
                    'coal_gen [MWh]','cap_coal [GW]',
                   ]].T
-    # index = 'E_cor [TWh]'
-    index = 'load_coverage [%]'
+    index = 'E_cor [TWh]'
+    # index = 'load_coverage [%]'
     CFs_i.set_index(index,inplace=True)
     
     col_dic = {'gas_OCGT_gen [MWh]':'OCGT',
@@ -136,8 +136,11 @@ def plot_generation_mix(tech_colors,sector):
     
     df_plot['x'] = x.loc[x_var]
     
+    perc_95 = df_plot['x'].quantile(0.95)
+    
     df_plot.sort_values(by = 'x',inplace=True)
     df_plot.set_index('x',inplace=True)
+    
     # tot = df_plot['tot']
     # Ecap =  df_plot['Ecap']
     # Gccap =  df_plot['Gccap']
@@ -194,7 +197,7 @@ def plot_generation_mix(tech_colors,sector):
     df_caps.sort_values(by = 'x',inplace=True)
     df_caps.set_index('x',inplace=True)
     #%% 
-    fig_gen, ax_gen = plt.subplots()
+    fig_gen, ax_gen = plt.subplots(figsize=(8, 5))
     ax_gen.stackplot(df_plot.drop(columns=['tot']).index,df_plot.drop(columns=['tot']).T/1e6,colors=[tech_colors[str(i)] for i in list(df_plot.drop(columns=['tot']).columns)],labels=[str(i) for i in list(df_plot.drop(columns=['tot']).columns)],lw=0)
     #%%
     ax_gen.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
@@ -206,9 +209,9 @@ def plot_generation_mix(tech_colors,sector):
     ax_gen.set_xlabel('Storage ' + x_vardic1[x_var])
     
     if sector == 0:
-        fig_gen.legend(bbox_to_anchor=(0.95, 0),ncol=3,prop={'size':18},frameon=True)
+        fig_gen.legend(bbox_to_anchor=(0.8, -0.05),ncol=3,prop={'size':18},frameon=True)
     else:
-        fig_gen.legend(bbox_to_anchor=(1.05, -0.05),ncol=3,prop={'size':18},frameon=True)
+        fig_gen.legend(bbox_to_anchor=(0.9, -0.05),ncol=3,prop={'size':18},frameon=True)
     fig_gen.savefig('figures/Actual_generation mix_' + x_vardic[x_var] + '_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
     
     #%%
@@ -253,6 +256,7 @@ def plot_generation_mix(tech_colors,sector):
     ax2.set_xlabel('Storage-X Load coverage [%]')
     
     ax1.axvline(2,ls='--',lw=2,color='k')
+    # ax1.axvline(perc_95,ls='-',lw=2,color='grey',zorder=-1)
     
     ax1.set_ylim([0,100])
     ax2.set_ylim([0,ax2.get_ylim()[1]])
@@ -293,26 +297,3 @@ def plot_generation_mix(tech_colors,sector):
     print('Wind: ' + str(round(wind_share.mean(),1)) + ' pm ' + str(round(1.96*wind_std,1))) # 1.96*std represents 95% confidence 
     print('Solar: ' + str(round(solar_share.mean(),1)) + ' pm ' + str(round(1.96*solar_std,1))) # 1.96*std represents 95% confidence
     print('Hydro: ' + str(round(hydro_share.mean(),1)) + ' pm ' + str(round(1.96*hydro_std,1))) # 1.96*std represents 95% confidence
-    #%%
-    # if x_var == 'load_coverage [%]':
-    #     fig,ax = plt.subplots(figsize=[10,5])
-    #     ax.plot(df_caps['battery_E'],color=tech_colors['battery'],lw=lw_raw,alpha=0.5)
-    #     ax.plot(df_caps['X_energy'],color=tech_colors['storage X'],lw=lw_raw,alpha=0.5)
-    #     ax.plot((df_caps['battery_E'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors['battery'],lw=2,label='Battery')
-    #     ax.plot((df_caps['X_energy'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors['storage X'],lw=2,label='Storage-X')
-    #     ax.set_xlabel('Load coverage [%]')
-    #     ax.set_ylabel('Energy capacity [TWh]')
-    #     ax.set_ylim([0,max(df_caps['X_energy'])])
-    #     ax.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
-    #     fig.savefig('figures/Energy_capacity_vs_LC_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
-    
-    #     fig,ax = plt.subplots(figsize=[10,5])
-    #     ax.plot(df_caps['battery'],color=tech_colors['battery'],lw=lw_raw,alpha=0.5)
-    #     ax.plot(df_caps['X_power'],color=tech_colors['storage X'],lw=lw_raw,alpha=0.5)
-    #     ax.plot((df_caps['battery'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors['battery'],lw=2,label='Battery')
-    #     ax.plot((df_caps['X_power'].rolling(rolling_interval).mean()).iloc[0:-5],color=tech_colors['storage X'],lw=2,label='Storage-X')
-    #     ax.set_xlabel('Load coverage [%]')
-    #     ax.set_ylabel('Power capacity [GW]')
-    #     ax.set_ylim([0,max(df_caps['X_power'])])
-    #     ax.set_xlim([min(x.loc[x_var]),max(x.loc[x_var])])
-    #     fig.savefig('figures/Power_capacity_vs_LC_' + str(sector) + '.png',bbox_inches="tight",dpi=300)

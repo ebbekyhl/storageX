@@ -13,6 +13,7 @@ Created on Wed Sep 14 12:51:26 2022
 """
 import pandas as pd
 import numpy as np
+import matplotlib.patheffects as PathEffects
 
 # df = df_chat_eta2
 # var1='eta2'
@@ -40,7 +41,7 @@ def check_boundary(variable_values, variable_names):
     return output
 
 def annotate(df, df1_update, color_variable, nrows, ncols, var1, var2, var_name1, var_name2, ax, normfactor, write_extra_indices, shading='auto', colormap="cool_r"):
-    fs=15
+    fs=20
     Z = df[color_variable].values.reshape(nrows, ncols)
     x = np.arange(ncols) 
     # x_l = np.arange(-0.5,ncols,0.5)
@@ -57,33 +58,33 @@ def annotate(df, df1_update, color_variable, nrows, ncols, var1, var2, var_name1
     ax.scatter(np.meshgrid(x, y)[0],np.meshgrid(x, y)[1],color='grey',alpha=0.5)
     
     if write_extra_indices:
-        strcolor1 = 'grey' # Text font color of "remaining parameters"
-        strcolor2 = 'k'
+        # strcolor1 = 'grey' # Text font color of "remaining parameters"
+        strcolor2 = 'white'
         # The indices are ordered in the following way: 'eta1','eta2','c1','c2','c_hat'
         if var1 == 'eta2' and var2 == 'eta1':
-            A_name = '$c_c$'
+            A_name = '$c_c^*\leq$'
             A_round = 0
-            B_name = '$c_d$'
+            B_name = '$c_d^*\leq$'
             B_round = 0
-            C_name = '$\hat{c}$'
+            C_name = '$\hat{c}^*\leq$'
             xdis = 0.75
             C_round = 0
             
         elif var1 == 'eta2' and var2 == 'c_hat':
-            A_name = '$\eta_c$'
+            A_name = '$\eta_c^*\geq$'
             A_round = 2
-            B_name = '$c_c$'
+            B_name = '$c_c^*\leq$'
             B_round = 0
-            C_name = '$c_d$'
+            C_name = '$c_d^*\leq$'
             C_round = 0
             xdis = 1.1
             
         elif var1 == 'c2' and var2 == 'c1':
-            A_name = '$\eta_c$'
+            A_name = '$\eta_c^*\geq$'
             A_round = 2
-            B_name = '$\eta_d$'
+            B_name = '$\eta_d^*\geq$'
             B_round = 2
-            C_name = '$\hat{c}$'
+            C_name = '$\hat{c}^*\leq$'
             C_round = 0
             xdis = 0.8
         
@@ -108,13 +109,19 @@ def annotate(df, df1_update, color_variable, nrows, ncols, var1, var2, var_name1
                 C = str(text_var[2].round(C_round)) if type(text_var[2]) == np.float64 else str(text_var[2])
             
             if count == ncols*(nrows-1):
-                ax.text(ii-xdis,jj-0.1,A_name,zorder=11, horizontalalignment='left', verticalalignment = 'top',color=strcolor1,fontsize=fs)
-                ax.text(ii-xdis,jj,B_name,zorder=11, horizontalalignment='left', verticalalignment = 'center',color=strcolor1,fontsize=fs)
-                ax.text(ii-xdis,jj+0.1,C_name,zorder=11, horizontalalignment='left', verticalalignment = 'bottom',color=strcolor1,fontsize=fs)
-            
-            ax.text(ii,jj-0.1,str(A),zorder=11, horizontalalignment='center', verticalalignment = 'top',color=strcolor2,fontsize=fs)
-            ax.text(ii,jj,str(B),zorder=11, horizontalalignment='center', verticalalignment = 'center',color=strcolor2,fontsize=fs)
-            ax.text(ii,jj+0.1,str(C),zorder=11, horizontalalignment='center', verticalalignment = 'bottom',color=strcolor2,fontsize=fs)
+                txt1 = ax.text(ii-xdis+0.7,jj-0.1,A_name,zorder=11, horizontalalignment='left', verticalalignment = 'top',color=strcolor2,fontsize=fs)
+                txt2 = ax.text(ii-xdis+0.7,jj,B_name,zorder=11, horizontalalignment='left', verticalalignment = 'center',color=strcolor2,fontsize=fs)
+                txt3 = ax.text(ii-xdis+0.7,jj+0.1,C_name,zorder=11, horizontalalignment='left', verticalalignment = 'bottom',color=strcolor2,fontsize=fs)
+                txt1.set_path_effects([PathEffects.withStroke(linewidth=0.5, foreground='k')])
+                txt2.set_path_effects([PathEffects.withStroke(linewidth=0.5, foreground='k')])
+                txt3.set_path_effects([PathEffects.withStroke(linewidth=0.5, foreground='k')])
+                
+            txt1 = ax.text(ii,jj-0.1,str(A),zorder=11, horizontalalignment='center', verticalalignment = 'top',color=strcolor2,fontsize=fs)
+            txt2 = ax.text(ii,jj,str(B),zorder=11, horizontalalignment='center', verticalalignment = 'center',color=strcolor2,fontsize=fs)
+            txt3 = ax.text(ii,jj+0.1,str(C),zorder=11, horizontalalignment='center', verticalalignment = 'bottom',color=strcolor2,fontsize=fs)
+            txt1.set_path_effects([PathEffects.withStroke(linewidth=0.5, foreground='k')])
+            txt2.set_path_effects([PathEffects.withStroke(linewidth=0.5, foreground='k')])
+            txt3.set_path_effects([PathEffects.withStroke(linewidth=0.5, foreground='k')])
     
     ax.set_yticks(np.arange(nrows))
     ax.set_xticks(np.arange(ncols))
@@ -196,6 +203,16 @@ def read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency):
 # lock_tau = False
     
 
+sector='T-H-I-B'
+slack=100
+threshold=2000
+normfactor=100
+color_variable='count_norm'
+combination=False
+write_extra_indices=True
+omit_charge_efficiency = False
+lock_tau = False
+
 def plot_2D_panels(sector, slack, threshold, normfactor=100, color_variable='count_norm', combination=True, write_extra_indices = False, omit_charge_efficiency = True, lock_tau = False):
    
     import matplotlib.pyplot as plt
@@ -236,10 +253,11 @@ def plot_2D_panels(sector, slack, threshold, normfactor=100, color_variable='cou
     if output == 'c_sys [bEUR]':
         df1_update[output] = df1_update[output]/df1_update[output].max()
         MI_df['output'] = MI_df['output']/MI_df['output'].max()
-    #%% Loop over quantiles
-    fig, ax = plt.subplots(1,3,figsize=figsiz)
-    plt.subplots_adjust(wspace=0.3,
-                        hspace=0.3)
+    #%% 
+    # fig, ax = plt.subplots(1,3,figsize=figsiz)
+    fig, ax = plt.subplots(1,1,figsize=[10,5])
+    # plt.subplots_adjust(wspace=0.3,
+    #                     hspace=0.3)
     
     eta1s = np.array([0.25,0.50,0.95], dtype=object)
     eta2s = np.array([0.25,0.50,0.95], dtype=object)
@@ -268,49 +286,49 @@ def plot_2D_panels(sector, slack, threshold, normfactor=100, color_variable='cou
     df_chat_eta2.columns = ['count']
     
     # Efficiency
-    df_etas_count = df1_update.query("E_cor >= @threshold_E")[['eta1','eta2',output]].groupby(['eta2','eta1']).count() #quantile(quantile,interpolation='nearest').copy()
-    df_etas_E = df1_update.query("E_cor >= @threshold_E")[['eta1','eta2',output]].groupby(['eta2','eta1']).min() #quantile(quantile,interpolation='nearest').copy()
-    df_etas.loc[df_etas_count.index] = df_etas_count
+    # df_etas_count = df1_update.query("E_cor >= @threshold_E")[['eta1','eta2',output]].groupby(['eta2','eta1']).count() #quantile(quantile,interpolation='nearest').copy()
+    # df_etas_E = df1_update.query("E_cor >= @threshold_E")[['eta1','eta2',output]].groupby(['eta2','eta1']).min() #quantile(quantile,interpolation='nearest').copy()
+    # df_etas.loc[df_etas_count.index] = df_etas_count
     
-    a = np.empty(len(df_etas))
-    a[:] = np.nan
-    df_etas['count_all'] = a
-    df_etas['count_all'].loc[df1_update.groupby(['eta2','eta1']).count().index] = df1_update.groupby(['eta2','eta1']).count()[output]
-    df_etas['count'].loc[df_etas['count_all'].dropna().index] = df_etas['count'].loc[df_etas['count_all'].dropna().index].fillna(0)
-    df_etas['count_norm'] = np.zeros(len(df_etas))
-    df_etas['count_norm'].loc[df1_update.groupby(['eta2','eta1']).count().index] = (df_etas.loc[df1_update.groupby(['eta2','eta1']).count().index].values.T/(df1_update.groupby(['eta2','eta1']).count()[output].values)*100)[0]
-    
+    # a = np.empty(len(df_etas))
+    # a[:] = np.nan
+    # df_etas['count_all'] = a
+    # df_etas['count_all'].loc[df1_update.groupby(['eta2','eta1']).count().index] = df1_update.groupby(['eta2','eta1']).count()[output]
+    # df_etas['count'].loc[df_etas['count_all'].dropna().index] = df_etas['count'].loc[df_etas['count_all'].dropna().index].fillna(0)
     # df_etas['count_norm'] = np.zeros(len(df_etas))
     # df_etas['count_norm'].loc[df1_update.groupby(['eta2','eta1']).count().index] = (df_etas.loc[df1_update.groupby(['eta2','eta1']).count().index].values.T/(df1_update.groupby(['eta2','eta1']).count()[output].values)*100)[0]
-    df_etas[output] = np.zeros(len(df_etas))
-    df_etas[output].loc[df_etas_count.index] = df_etas_E[output].values
-    df_etas[output].loc[list(df_etas['count'][df_etas['count'] == 0].index.values)] = df1_update.groupby(['eta2','eta1']).max().loc[list(df_etas['count'][df_etas['count'] == 0].index.values)]['E_cor']
     
-    # -------------------------- #
-    extra_indeces = [] # We are reducing the space from 5D to 2D. Here, we collect descriptors from the omitted 3D space.
-    # The indices are ordered in the following way: 'eta1','eta2','c1','c2','c_hat'
-    for i in range(len(df_etas)):
-        out = df_etas.iloc[i][output].item()
-        out1 = df_etas.iloc[i]['count'].item()
-        if np.isnan(out1) or out1 == 0:
-            list_add = ('','','')
-            extra_indeces.append(list_add)
-        else:    
-            if combination == True:
-                list_add = MI_df.query("output == @out").index[0][2:]
-            else:
-                max_ind = df1_update.query('E_cor >= @threshold_E').groupby(['eta2','eta1']).max().loc[df_etas.iloc[i].name]
-                
-                max_c_hat = max_ind.loc['c_hat']
-                max_c1 = max_ind.loc['c1']
-                max_c2 = max_ind.loc['c2']
-                
-                [max_c_hat, max_c1, max_c2] = check_boundary([max_c_hat, max_c1, max_c2],['c_hat','c1','c2'])
+    # # df_etas['count_norm'] = np.zeros(len(df_etas))
+    # # df_etas['count_norm'].loc[df1_update.groupby(['eta2','eta1']).count().index] = (df_etas.loc[df1_update.groupby(['eta2','eta1']).count().index].values.T/(df1_update.groupby(['eta2','eta1']).count()[output].values)*100)[0]
+    # df_etas[output] = np.zeros(len(df_etas))
+    # df_etas[output].loc[df_etas_count.index] = df_etas_E[output].values
+    # df_etas[output].loc[list(df_etas['count'][df_etas['count'] == 0].index.values)] = df1_update.groupby(['eta2','eta1']).max().loc[list(df_etas['count'][df_etas['count'] == 0].index.values)]['E_cor']
     
-                list_add = (max_c1, max_c2, max_c_hat)
+    # # -------------------------- #
+    # extra_indeces = [] # We are reducing the space from 5D to 2D. Here, we collect descriptors from the omitted 3D space.
+    # # The indices are ordered in the following way: 'eta1','eta2','c1','c2','c_hat'
+    # for i in range(len(df_etas)):
+    #     out = df_etas.iloc[i][output].item()
+    #     out1 = df_etas.iloc[i]['count'].item()
+    #     if np.isnan(out1) or out1 == 0:
+    #         list_add = ('','','')
+    #         extra_indeces.append(list_add)
+    #     else:    
+    #         if combination == True:
+    #             list_add = MI_df.query("output == @out").index[0][2:]
+    #         else:
+    #             max_ind = df1_update.query('E_cor >= @threshold_E').groupby(['eta2','eta1']).max().loc[df_etas.iloc[i].name]
+                
+    #             max_c_hat = max_ind.loc['c_hat']
+    #             max_c1 = max_ind.loc['c1']
+    #             max_c2 = max_ind.loc['c2']
+                
+    #             [max_c_hat, max_c1, max_c2] = check_boundary([max_c_hat, max_c1, max_c2],['c_hat','c1','c2'])
+    
+    #             list_add = (max_c1, max_c2, max_c_hat)
             
-            extra_indeces.append(list_add)
-    df_etas['extra_coordinates'] = extra_indeces
+    #         extra_indeces.append(list_add)
+    # df_etas['extra_coordinates'] = extra_indeces
     # ---------------------------#
     
     # Power capacity cost
@@ -402,27 +420,23 @@ def plot_2D_panels(sector, slack, threshold, normfactor=100, color_variable='cou
     df_chat_eta2['extra_coordinates'] = extra_indeces
     # ---------------------------#
     
-    # Plotting
-    # Capacity cost
-    nrows = 4
-    ncols = 4
-    # color_variable = 'count'
-    annotate(df_cs, df1_update, color_variable, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[0], normfactor=normfactor,  write_extra_indices=write_extra_indices, shading=shading, colormap=cmap)
+    # # Plotting
+    # # Capacity cost
+    # nrows = 4
+    # ncols = 4
+    # annotate(df_cs, df1_update, color_variable, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[0], normfactor=normfactor,  write_extra_indices=write_extra_indices, shading=shading, colormap=cmap)
     
-    # Efficiency
-    nrows = 3
-    ncols = 3 if omit_charge_efficiency else 4
-    
-    # color_variable = 'count_norm'
-    annotate(df_etas, df1_update, color_variable, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[1], normfactor=normfactor, write_extra_indices=write_extra_indices,shading=shading, colormap=cmap)
+    # # Efficiency
+    # nrows = 3
+    # ncols = 3 if omit_charge_efficiency else 4
+    # annotate(df_etas, df1_update, color_variable, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[1], normfactor=normfactor, write_extra_indices=write_extra_indices,shading=shading, colormap=cmap)
     
     # Energy capacity cost vs discharge efficiency
     nrows = 3
     ncols = 7
-    # color_variable = 'count_norm'
-    annotate(df_chat_eta2, df1_update, color_variable, nrows, ncols, var1='eta2',var2='c_hat',var_name1=r'$\hat{c}$' + ' [€/kWh]',var_name2=r'$\eta_d$'+ ' [-]', ax=ax[2], normfactor=normfactor,write_extra_indices=write_extra_indices,shading=shading, colormap=cmap)
+    annotate(df_chat_eta2, df1_update, color_variable, nrows, ncols, var1='eta2',var2='c_hat',var_name1=r'$\hat{c}$' + ' [€/kWh]',var_name2=r'$\eta_d$'+ ' [-]', ax=ax, normfactor=normfactor,write_extra_indices=write_extra_indices,shading=shading, colormap=cmap)
        
-    cb_ax = fig.add_axes([0.92,0.1,0.02,0.6])
+    cb_ax = fig.add_axes([0.92,0.1,0.05,0.6])
     cb_ax.tick_params(direction='out', length=6, width=2, colors='k',
                       grid_color='k', grid_alpha=1)   
     

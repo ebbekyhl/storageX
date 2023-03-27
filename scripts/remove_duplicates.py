@@ -6,8 +6,8 @@ Created on Fri Feb 24 17:12:16 2023
 """
 
 import pandas as pd
-# file = '../results/sspace_w_sectorcoupling_merged.csv'
-file = '../results/sspace_w_sectorcoupling_wo_duplicates.csv'
+file = '../results/sspace_w_sectorcoupling_merged.csv'
+# file = '../results/sspace_w_sectorcoupling_wo_duplicates.csv'
 sectors = ['T-H-I-B','T-H','-']
 sspace_all = pd.read_csv(file,index_col=0)
 
