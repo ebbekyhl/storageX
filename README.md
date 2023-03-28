@@ -11,7 +11,7 @@ The study aims to investigate what a cost-competitive long-duration storage tech
 
 We use the energy system model __PyPSA-Eur-Sec__ to derive the unique combinations that entail a substantial optimal storage deployment:
 
-![panel_fig2](Spiderweb_result_0_w_TES_[2]_E_cor_Nperf6_w_legend.png)
+![panel_fig2](Spiderweb.png)
 
 Subsequently, we list design strategies that storage tech developers can use as a crosshair for further development:
 
