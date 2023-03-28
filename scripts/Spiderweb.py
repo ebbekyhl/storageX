@@ -117,8 +117,6 @@ import matplotlib as mpl
 import pandas as pd
 plt.close('all')
 
-
-
 def plot_sspace(i, threshold_E, data_plot,csv,frame,colvar,radar,k,normfactor,lines,line_color,cmap,lw=0.5,factor=0.00005,zord=0): #0.00001,lw=0.1,zord=0):
     data_norm = csv.loc[i].loc[colvar]/normfactor
     # alpha = 1
@@ -281,7 +279,6 @@ def plot_spiderweb(scen = 'T-H-I-B', threshold_E = 2000, plot_ex = False, candid
         normfactor = 2000
     else:
         normfactor = csv[colvar].max()
-    # normfactor = 10
     
     range_upper = [eta_d_range_plot[1],c_hat_range_plot[1],c_c_range_plot[1],eta_c_range_plot[1],tau_SD_range_plot[1],c_d_range_plot[1]]
     range_lower = [eta_d_range_plot[0],c_hat_range_plot[0],c_c_range_plot[0],eta_c_range_plot[0],tau_SD_range_plot[0],c_d_range_plot[0]]
@@ -303,21 +300,13 @@ def plot_spiderweb(scen = 'T-H-I-B', threshold_E = 2000, plot_ex = False, candid
                                            sloss,
                                            discharge_c)), columns=case.columns)
     
-    # configs_df['c_hat'] *= 20
-    # configs_df['c_c'] *= 350
-    # configs_df['c_d'] *= 350
-    
     configs_df['c_hat'] *= 20/40
     configs_df['eta_c'] *= 0.5
     configs_df['eta_d'] *= 0.5
     configs_df['c_c'] *= 350/700
     configs_df['c_d'] *= 350/700
     #%%
-    # data_plots = pd.DataFrame(index=['eta_d','c_hat','c_c','eta_c','tau_SD','c_d'])
-    
-    # print(csv['E_cor'][csv['E_cor'] >= threshold_E].shape)
-    
-    # j = 0
+
     fig1 = plt.figure(figsize=(10, 13))
     n_ordinate_levels = 2
     title = ''
@@ -338,8 +327,6 @@ def plot_spiderweb(scen = 'T-H-I-B', threshold_E = 2000, plot_ex = False, candid
             
         if len(perf_jj) <= N_perfections:
         
-            # eta_1 = data_plot.loc['eta_c']
-            
             if (data_plot.loc['eta_c']+eta_c_range_plot[0] > 1):
                 data_plot.loc['eta_c'] = 1-0.5*eta_c_range_plot[0]
             
@@ -350,20 +337,10 @@ def plot_spiderweb(scen = 'T-H-I-B', threshold_E = 2000, plot_ex = False, candid
             frame = pd.DataFrame(index=data_plot.index)
             frame['range_upper'] = range_upper
             frame['range_lower'] = range_lower
-            # lc_i.append(csv.loc[i].lc)
-                   
-            # if i in csv['E_cor'][csv['E_cor'] >= threshold_E].index:
-                # if (ex_i == 'PTES_[1]') and (eta_1 > 1):
-                #     cmap = plt.cm.get_cmap('Greens')
-                #     plot_sspace(data_plot,csv,frame,colvar,radar,k,normfactor,lines,line_color,cmap,zord=-1)
-                # elif eta_1 <= 1:
+
             cmap = plt.cm.get_cmap(colorsectors[scen])
             plot_sspace(i, threshold_E, data_plot,csv,frame,colvar,radar,k,normfactor,lines,line_color,cmap)
-                # data_plots[i] = data_plot
-                
-            # cmap = plt.cm.get_cmap(colorsectors[sector])
-            # plot_sspace(data_plot,csv,frame,colvar,radar,k,normfactor,lines,line_color,cmap)
-        
+
         k += 1
         
     for it, ax in enumerate(fig1.axes):
@@ -472,4 +449,3 @@ def plot_spiderweb(scen = 'T-H-I-B', threshold_E = 2000, plot_ex = False, candid
                     
     fig1.savefig('figures/Spiderweb_result_' + scen+ '_w_' + '_' + colvar + '_Nperf' + str(N_perfections) + '.png',
                     bbox_inches="tight",dpi=300)
-        # j += 1

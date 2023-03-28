@@ -90,34 +90,18 @@ def multivariable_regression(fitting='E',
         
         # Output
         df1['E'] = sspace.loc['E [GWh]'].astype(float)*df1['eta2']
-        
         df1['log_E'] = np.log(df1['E'])
-        
         df1['LC'] = sspace.loc[lc_dic].astype(float)
         system_cost_norm = sspace.loc['c_sys [bEUR]'].astype(float)/(sspace.loc['c_sys [bEUR]'].astype(float).max())
         df1['SCR'] = (1 - system_cost_norm.values)*100
         
-        # df1['log_SCR'] = np.log(df1['SCR'])
-        
         df1 = df1.sort_values(['c_hat','c1','eta1','c2','eta2','tau_SD'])
         # df1 = df1.query('E_cor > 1')
         
-        #%%
         # Regression
         df_data = df1[included_parameters] 
         X = df_data
         
-        # X_noscaling = X # We do not scale them before the regression. This is to compare the standardized regression coefficients instead
-        # X_withscaling = (X - X.min())/(X.max()-X.min()) # We do a min-max scaling of the parameters            
-        
-        # if fitting == 'SCR':
-        #     # System cost reduction
-        #     # X_scaling = X
-        #     X_scaling = (X - X.min())/(X.max()-X.min())
-        #     y_init = (1 - df1['SCR'].values)*100
-        #     y = (y_init - y_init.min())/(y_init.max()-y_init.min())
-
-        # else:
         if scaling:
             # Normalization
             X_scaling = (X - X.min())/(X.max()-X.min()) # We do a min-max scaling of the parameters
@@ -206,18 +190,8 @@ def multivariable_regression(fitting='E',
                 col = 'white'
                 
             ax.text(0.5+j,0.5+i,str(params[i,j].round(2)),fontsize=18, horizontalalignment='center', verticalalignment = 'center', color=col)
-            # pvalue_float = pvalues[i,j]
-            # if pvalue_float < 1e-3:
-            #     pvalue_str = 'p < ' + r'$10^{-3}$'
-            # else:
-            #     pvalue_str = 'p = ' + str(pvalue_float.round(3))
-            
-            # if print_pvals:
-            #     ax.text(0.5+j,0.3+i,pvalue_str,fontsize=15, horizontalalignment='center', verticalalignment = 'center',color='grey')
-            
             ax.text(0.5+j,0.3+i,added_R2_adj[i][j],fontsize=15, horizontalalignment='center', verticalalignment = 'center',color='grey')
     
-    # ax.grid(axis='both')
     fig.savefig('figures/GLM_coefficients_sectors_' + fitting + str(scaling) + '.png',
                 bbox_inches="tight",dpi=300)
     

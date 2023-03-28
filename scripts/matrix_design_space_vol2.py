@@ -493,26 +493,6 @@ for sector in sectors:
              color = "grey")
     
     fig.savefig('../figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '_mean.png', dpi=300, bbox_inches='tight')
-#%%
-# coord = (0.5,0.5) # (eta1,eta2)
-
-# coords = [(0.25,0.25),
-#           (0.25,0.50),
-#           (0.25,0.95),
-#           (0.5,0.25),
-#           (0.5,0.50),
-#           (0.5,0.95),
-#           (0.95,0.25),
-#           (0.95,0.50),
-#           (0.95,0.95),
-#           ]
-
-# for coord in coords:
-#     plt.figure()
-#     sns.distplot(MI_df.loc[coord],kde=False)
-#     plt.axvline(MI_df.loc[coord].quantile(0.25).item())
-#     plt.axvline(MI_df.loc[coord].quantile(0.50).item())
-#     plt.axvline(MI_df.loc[coord].quantile(0.75).item())
 
 
 

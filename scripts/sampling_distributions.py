@@ -22,14 +22,14 @@ plt.rcParams['xtick.direction'] = 'out'
 plt.rcParams['ytick.direction'] = 'out'
 plt.rcParams['axes.axisbelow'] = True
 
-# fig6, ax6 = plt.subplots(figsize=[10,6])
+
 fig7, ax7 = plt.subplots(figsize=[10,6])
 fig8, ax8 = plt.subplots(figsize=[10,6])
 fig9, ax9 = plt.subplots(figsize=[10,6])
 fig10, ax10 = plt.subplots(figsize=[10,6])
 fig11, ax11 = plt.subplots(figsize=[10,6])
 fig12, ax12 = plt.subplots(figsize=[10,6])
-#%%
+
 perfection = {'eta1 [-]':0.95,
               'eta2 [-]':0.95,
               'c1':35,
@@ -37,7 +37,7 @@ perfection = {'eta1 [-]':0.95,
               'c_hat [EUR/kWh]':1}
 
 N_perfections = 6
-#%%
+
 sspace = pd.read_csv('../results/sspace_w_sectorcoupling_merged.csv',index_col=0)
 sector = sspace.loc['sector'].fillna(0)
     
@@ -50,7 +50,6 @@ color_dic = {'0':'green',
 
 threshold = 2
 
-# yax = 'percentage'
 yax = 'number'
 
 count = 0
@@ -60,13 +59,6 @@ for sec in [0,'T-H','T-H-I-B']:
     
     sspace_sector_initial_i = sspace_i[sector_i[sector_i == sec].index].drop(index='sector').astype(float)
     sspace_sector_initial_i = sspace_sector_initial_i[sspace_sector_initial_i.loc['eta1 [-]'][sspace_sector_initial_i.loc['eta1 [-]'] <= 1].index]
-    
-    # sspace_tau_10 = sspace_sector_initial[sspace_sector_initial.loc['tau [n_days]'][sspace_sector_initial.loc['tau [n_days]'] == 10].index]
-    # sspace_tau_30 = sspace_sector_initial[sspace_sector_initial.loc['tau [n_days]'][sspace_sector_initial.loc['tau [n_days]'] == 30].index]
-    # df_10 = sspace_tau_10.loc[['c1','c2','eta1 [-]','eta2 [-]','c_hat [EUR/kWh]']].T
-    # df_30 = sspace_tau_30.loc[['c1','c2','eta1 [-]','eta2 [-]','c_hat [EUR/kWh]']].T
-    # df_diff = pd.concat([df_10,df_30]).drop_duplicates(keep=False)
-    # sspace_sector_initial.drop(columns = df_diff.index,inplace=True)
     
     data_initial_7 = np.array(sspace_sector_initial.loc['c1'])
     data_initial_7.sort()
@@ -93,8 +85,7 @@ for sec in [0,'T-H','T-H-I-B']:
     data_initial_11_i.sort()
     data_initial_12_i = np.array(sspace_sector_initial_i.loc['tau [n_days]'])
     data_initial_12_i.sort()
-    
-    # print(len(sspace_sector_initial.columns))
+
     sspace_sector = sspace_sector_initial.copy()
     for i in sspace_sector.columns:
         conf_i = sspace_sector[i]
@@ -110,14 +101,10 @@ for sec in [0,'T-H','T-H-I-B']:
     
     E = sspace_sector.loc['E [GWh]']*sspace_sector.loc['eta2 [-]']/1000
     
-    
     E = E[E >= threshold]
-    
     
     sspace_sector = sspace_sector[E.index]
     
-    # ax6.plot(sspace_sector.loc['c_hat [EUR/kWh]'],sspace_sector.loc['E [GWh]'],'.',color=color_dic[str(sec)])
-
     sspace_40 = sspace_sector.loc["c_hat [EUR/kWh]"][sspace_sector.loc["c_hat [EUR/kWh]"] == 40.0].index
         
     wi = 0.15
@@ -268,46 +255,33 @@ for sec in [0,'T-H','T-H-I-B']:
 
 ax7.set_xticks([0,1,2,3])
 ax7.set_xticklabels([35,350,490,700])
-# ax7.set_ylabel('Number of configurations')
 ax7.set_xlabel('Charge capacity cost ' + r'$c_c$' + ' [EUR/kW]',fontsize=fs)
-# ax7.set_ylim([0,ymax])
 ax7.grid()
 
 ax8.set_xticks([0,1,2,3])
 ax8.set_xticklabels([35,350,490,700])
-# ax8.set_ylabel('Number of configurations')
 ax8.set_xlabel('Discharge capacity cost ' + r'$c_d$' + ' [EUR/kW]',fontsize=fs)
-# ax8.set_ylim([0,ymax])
 ax8.grid()
 
 ax9.set_xticks([0,1,2])
 ax9.set_xticklabels([25,50,95])
-# ax9.set_ylabel('Number of configurations')
 ax9.set_xlabel('Charge efficiency ' + r'$\eta_c$' + ' [%]',fontsize=fs)
-# ax9.set_ylim([0,ymax])
 ax9.grid()
 
 ax10.set_xticks([0,1,2])
 ax10.set_xticklabels([25,50,95])
-# ax10.set_xlim([-0.2,2.2])
-# ax10.set_ylabel('Number of configurations')
 ax10.set_xlabel('Discharge efficiency ' + r'$\eta_d$' + ' [%]',fontsize=fs)
-# ax10.set_ylim([0,ymax])
 ax10.grid()
 
 ax11.set_xticks([0,1,2,3,4,5,6])
 ax11.set_xticklabels([1,2,5,10,20,30,40])
-# ax11.set_ylabel('Number of configurations')
 ax11.set_xlabel('Energy capacity cost ' + r'$\hat{c}$' + ' [EUR/kWh]',fontsize=fs)
-# ax11.set_ylim([0,ymax])
 ax11.grid()
 
 ax12.set_xticks([0,1])
 ax12.set_xticklabels([10,30])
-# ax12.set_ylabel('Number of configurations')
 ax12.set_xlabel('Self-discharge time ' + r'$\tau_{SD}$' + ' [days]',fontsize=fs)
 ax12.grid()
-
 
 for ax in [ax7,ax8,ax9,ax10,ax11,ax12]:
     if yax == 'percentage':

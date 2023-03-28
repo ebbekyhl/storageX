@@ -325,34 +325,4 @@ def plot_matrix(quantiles = [0.25,0.50,0.75,1.00], sector = 'T-H-I-B', threshold
     
     fig.savefig('figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '.png', dpi=300, bbox_inches='tight')
     
-    # #%% Make historgrams of "the remaining 3D space"
-    # # Coordinates in the matrix
-    # coord1 = 'c1'
-    # coord2 = 'c2'
-    
-    # coord1s = df1_update[coord1].unique()
-    # coord1s.sort()
-    # coord2s = df1_update[coord2].unique()
-    # coord2s.sort()
-    
-    # # Remaining 3D space
-    # MI_df.reset_index(inplace=True)
-    # MI_df.set_index([coord1,coord2],inplace=True)
-    
-    # # Pick a point in the 2D grid:
-    # coords = [(coord1s[0],coord2s[0]),
-    #           (coord1s[1],coord2s[1]),
-    #           (coord1s[2],coord2s[2])] # in this case, the diagonal
-    # #%%
-    # if output == 'E_cor':
-    #     for coord in coords:
-    #         plt.figure()
-    #         sns.distplot(MI_df.loc[coord]['output'],kde=True).set(xlim=(0, MI_df.loc[coord]['output'].max()*1.05))
-    #         plt.axvline(MI_df.loc[coord]['output'].quantile(0.25,interpolation='nearest').item(),color='k',ls='--')
-    #         plt.axvline(MI_df.loc[coord]['output'].quantile(0.50,interpolation='nearest').item(),color='k',ls='--')
-    #         plt.axvline(MI_df.loc[coord]['output'].quantile(0.75,interpolation='nearest').item(),color='k',ls='--')
-    #         plt.axvline(MI_df.loc[coord]['output'].quantile(1,interpolation='nearest').item(),color='k',ls='--')
-    #         plt.title(coord,fontsize=fs)
-    
-    
     

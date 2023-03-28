@@ -46,47 +46,19 @@ cdic = {'EU':'Europe',
         'ES':'Spain',
         'NO':'Norway'}
 
-# variable = r'$\hat{c}$'
 variable = 'CO2'
-
-# year = '2000' 
-# year = '2004'
-# year = '2013'
-
-# sector = ''
 sector = '-'
-# sector = '-T-H'
-# sector = '-T-H-I-B'
-
-# value = '0.0'
-# value = '1.0'
-# value = '3.0'
 value = '5.0'
-
-# unit = '€/kWh'
 unit = '%'
 
 size = 'small'
-# size = 'big'
-freq = 1 # averaging after being sorted (technically, not the correct way)
-freq1 = 1 # averaging before being sorted (more correct)
-# path = 'C:\\Users/au485969/OneDrive - Aarhus Universitet/PhD/WP1/Results/weather_year/small_ref/'
 
-# path = 'C:\\Users/au485969/OneDrive - Aarhus Universitet/PhD/WP1/Results/17thJune_cross_sectoral_solution_space/simple_sweep/'
 path = '../results/simple_sweep/'
-# path = 'C:\\Users/au485969/OneDrive - Aarhus Universitet/PhD/WP1/Results/17thJune_cross_sectoral_solution_space/chat/'
-
-# if size == 'big':
-#     tres = '3h'
-# else:
-#     tres = 'h'
 
 sector_dic = {'-T-H':'TH','-T-H-I-B':'fullsector'}
-
 ecolor_dic = {'-':'green',
               'T-H':'blue',
               'T-H-I-B':'orange'}
-
 tres = '3h'
 fs_title = 18
 

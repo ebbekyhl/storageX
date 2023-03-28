@@ -80,60 +80,6 @@ def state_of_charge(networks_opt, scen):
     discharge_t_bat[scen].plot(ax=ax4,label=scen_dic[scen])
     plt.legend()
     
-
-#%%
-# import warnings
-# warnings.filterwarnings("ignore")
-# import yaml
-# import matplotlib.pyplot as plt
-# import pandas as pd
-# # import numpy as np
-
-# tech_colors_path = 'tech_colors.yaml'
-
-# fs = 18
-# plt.style.use('seaborn-ticks')
-# plt.rcParams['axes.labelsize'] = fs
-# plt.rcParams['xtick.labelsize'] = fs
-# plt.rcParams['ytick.labelsize'] = fs
-# plt.rcParams['xtick.direction'] = 'out'
-# plt.rcParams['ytick.direction'] = 'out'
-# plt.rcParams['axes.axisbelow'] = True
-
-# with open(tech_colors_path) as file:
-#     tech_colors = yaml.safe_load(file)['tech_colors']
-# tech_colors['CO2 capture'] = tech_colors['DAC']
-# tech_colors['domestic demand'] = '#050000'
-# tech_colors['industry demand'] = '#423737'
-# tech_colors['BEV'] = '#dffc03'
-# tech_colors['EV battery'] = '#dffc03'
-# tech_colors['heat pump'] = '#b52f2f'
-# tech_colors['resistive heater'] = '#c45c5c'
-# tech_colors['V2G'] = '#38f2d9'
-# tech_colors['transmission lines'] = '#6c9459'
-# tech_colors['storage-X'] = '#610555'
-# tech_colors['storage X'] = '#610555'
-# tech_colors['X'] = '#610555'
-# tech_colors['pumped hydro'] = '#53c7ba'
-# tech_colors['PHS'] = '#53c7ba'
-# tech_colors['biomass CHP CC'] = '#211408' # "#6e441c"
-# tech_colors['gas CHP CC'] = '#211508' # "#6e441c"
-
-# networks_opt = {'path':'../networks/high_efficiency/',
-#                 'wyear': '2003', 
-#                 'eta1':'1.0', 
-#                 'eta2':'1.9',
-#                 'c1':'1.0', 
-#                 'c2':'1.0', 
-#                 'chat':'0.15'} # Check which network configurations are available in your path
-
-# # scen=''
-# scen='-T-H-I-B'
-# moving_average=8 #*7
-
-
-#%%
-
 def temporal(networks_opt, scen, moving_average, tech_colors):
     from scripts.plotting import plot_series
     import pandas as pd
@@ -164,10 +110,6 @@ def temporal(networks_opt, scen, moving_average, tech_colors):
     c = 'EU'
     ax_AC_1year, fig_AC_1year, supply = plot_series(n,country=c,dstart=pd.to_datetime('1/1/2013'),dend=pd.to_datetime('31/12/2013'),tech_colors=tech_colors,moving_average=moving_average_steps,carrier="AC")
     fig_AC_1year.savefig('figures/Timeseries_' + scen + '_eta_d_factor' + eta2 + '_' + c + '.png',bbox_inches="tight",dpi=600)
-    
-    # dstart = pd.to_datetime('2/11/2013')
-    # dend = pd.to_datetime('2/14/2013')
-    # 
     dstart = pd.to_datetime('2/10/2013')
     dend = pd.to_datetime('2/17/2013')
     

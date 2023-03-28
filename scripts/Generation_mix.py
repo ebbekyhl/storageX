@@ -141,17 +141,6 @@ def plot_generation_mix(tech_colors,sector):
     df_plot.sort_values(by = 'x',inplace=True)
     df_plot.set_index('x',inplace=True)
     
-    # tot = df_plot['tot']
-    # Ecap =  df_plot['Ecap']
-    # Gccap =  df_plot['Gccap']
-    # Gdcap =  df_plot['Gdcap']
-    # etac =  df_plot['etac']
-    # etad =  df_plot['etad']
-    # cc =  df_plot['cc']
-    # cd =  df_plot['cd']
-    # chat = df_plot['chat']
-    # syscost = df_plot['syscost']
-    # bat_lc = df_plot['bat_lc']
     df_plot.drop(columns=['Ecap','Gccap','Gdcap','etac','etad','cc','cd','chat','syscost','bat_lc'],inplace=True)
     #%%
     if df_plot['coal'].max()/(df_plot.sum(axis=1).min()) < 1e-3:
@@ -271,15 +260,6 @@ def plot_generation_mix(tech_colors,sector):
         ax1.legend(prop={'size':18},ncol=1)
         
     ax2.legend(prop={'size':18})
-    
-    # handles, labels = ax.get_legend_handles_labels()
-    # handles1, labels1 = ax1.get_legend_handles_labels()
-    # handles2, labels2 = ax2.get_legend_handles_labels()
-    # handles3, labels3 = ax3.get_legend_handles_labels()
-    
-    # fig.legend(list(reversed(handles)) + handles3, list(reversed(labels)) + labels3, bbox_to_anchor=(0.88, 0.04),ncol=4,prop={'size':fs},frameon=True)
-    # fig.legend(handles1 + handles2, labels1 + labels2, bbox_to_anchor=(0.95, 0.04),ncol=3,prop={'size':fs},frameon=True)
-    # fig.legend(handles, labels, bbox_to_anchor=(0.95, 0.04),ncol=3,prop={'size':fs},frameon=True)
     
     fig.savefig('figures/Generation mix_' + x_vardic[x_var] + '_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
     

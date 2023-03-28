@@ -15,16 +15,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.patheffects as PathEffects
 
-# df = df_chat_eta2
-# var1='eta2'
-# var2='c_hat'
-# var_name1=r'$\hat{c}$' + ' [€/kWh]'
-# var_name2=r'$\eta_d$'+ ' [-]'
-# ax=ax[2]
-# normfactor=normfactor
-# shading=shading
-# colormap=cmap
-
 def check_boundary(variable_values, variable_names):
     uni_max_dic = {'c_hat': 40, 
                    'c1': 700,
@@ -44,9 +34,7 @@ def annotate(df, df1_update, color_variable, nrows, ncols, var1, var2, var_name1
     fs=20
     Z = df[color_variable].values.reshape(nrows, ncols)
     x = np.arange(ncols) 
-    # x_l = np.arange(-0.5,ncols,0.5)
     y = np.arange(nrows)
-    # y_l = np.arange(-0.5,nrows,0.5)
     vmin = 0
     im = ax.pcolormesh(x, y, Z, vmin=vmin, vmax=normfactor,shading=shading, cmap=colormap,zorder=0)
     
@@ -191,18 +179,6 @@ def read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency):
     
     return df1_update, MI_df
 
-
-# sector='T-H-I-B'
-# combination = False
-# write_extra_indices = True
-# slack=100
-# threshold=2000
-# normfactor = 100
-# color_variable = 'count_norm'
-# omit_charge_efficiency = True
-# lock_tau = False
-    
-
 sector='T-H-I-B'
 slack=100
 threshold=2000
@@ -229,24 +205,14 @@ def plot_2D_panels(sector, slack, threshold, normfactor=100, color_variable='cou
     plt.rcParams['axes.axisbelow'] = True 
     
     sspace_og = pd.read_csv('results/sspace_w_sectorcoupling_wo_duplicates.csv',index_col=0)
-    # sspace_og = pd.read_csv('results/sspace_3888.csv',index_col=0)
-    
+
     shading = 'nearest' # No interpolation or averaging
-    # shading = 'flat' # The color represent the average of the corner values
-    # shading='gouraud' # Gouraud: the color in the quadrilaterals is linearly interpolated
-    
+
     cmap = "cool"
-    # cmap = "spring_r"
-    
+
     output = 'E_cor'
-    # output = 'lc'
-    # output = 'c_sys [bEUR]'
-    
+
     threshold_E = threshold - slack
-    
-    # normfactor = 100 #threshold_E # 2000 # what storage-X needs to provide in terms of cumulative storage energy capacity
-    # normfactor = 2 # what storage-X needs to provide in terms of cumulative load coverage over a year
-    # normfactor = 1
     
     figsiz = [18,4]
     df1_update,MI_df = read_sspace(sspace_og,sector,output,lock_tau,omit_charge_efficiency)
@@ -284,52 +250,6 @@ def plot_2D_panels(sector, slack, threshold, normfactor=100, color_variable='cou
     a[:] = np.nan
     df_chat_eta2 = pd.DataFrame(a,index=multiindex)
     df_chat_eta2.columns = ['count']
-    
-    # Efficiency
-    # df_etas_count = df1_update.query("E_cor >= @threshold_E")[['eta1','eta2',output]].groupby(['eta2','eta1']).count() #quantile(quantile,interpolation='nearest').copy()
-    # df_etas_E = df1_update.query("E_cor >= @threshold_E")[['eta1','eta2',output]].groupby(['eta2','eta1']).min() #quantile(quantile,interpolation='nearest').copy()
-    # df_etas.loc[df_etas_count.index] = df_etas_count
-    
-    # a = np.empty(len(df_etas))
-    # a[:] = np.nan
-    # df_etas['count_all'] = a
-    # df_etas['count_all'].loc[df1_update.groupby(['eta2','eta1']).count().index] = df1_update.groupby(['eta2','eta1']).count()[output]
-    # df_etas['count'].loc[df_etas['count_all'].dropna().index] = df_etas['count'].loc[df_etas['count_all'].dropna().index].fillna(0)
-    # df_etas['count_norm'] = np.zeros(len(df_etas))
-    # df_etas['count_norm'].loc[df1_update.groupby(['eta2','eta1']).count().index] = (df_etas.loc[df1_update.groupby(['eta2','eta1']).count().index].values.T/(df1_update.groupby(['eta2','eta1']).count()[output].values)*100)[0]
-    
-    # # df_etas['count_norm'] = np.zeros(len(df_etas))
-    # # df_etas['count_norm'].loc[df1_update.groupby(['eta2','eta1']).count().index] = (df_etas.loc[df1_update.groupby(['eta2','eta1']).count().index].values.T/(df1_update.groupby(['eta2','eta1']).count()[output].values)*100)[0]
-    # df_etas[output] = np.zeros(len(df_etas))
-    # df_etas[output].loc[df_etas_count.index] = df_etas_E[output].values
-    # df_etas[output].loc[list(df_etas['count'][df_etas['count'] == 0].index.values)] = df1_update.groupby(['eta2','eta1']).max().loc[list(df_etas['count'][df_etas['count'] == 0].index.values)]['E_cor']
-    
-    # # -------------------------- #
-    # extra_indeces = [] # We are reducing the space from 5D to 2D. Here, we collect descriptors from the omitted 3D space.
-    # # The indices are ordered in the following way: 'eta1','eta2','c1','c2','c_hat'
-    # for i in range(len(df_etas)):
-    #     out = df_etas.iloc[i][output].item()
-    #     out1 = df_etas.iloc[i]['count'].item()
-    #     if np.isnan(out1) or out1 == 0:
-    #         list_add = ('','','')
-    #         extra_indeces.append(list_add)
-    #     else:    
-    #         if combination == True:
-    #             list_add = MI_df.query("output == @out").index[0][2:]
-    #         else:
-    #             max_ind = df1_update.query('E_cor >= @threshold_E').groupby(['eta2','eta1']).max().loc[df_etas.iloc[i].name]
-                
-    #             max_c_hat = max_ind.loc['c_hat']
-    #             max_c1 = max_ind.loc['c1']
-    #             max_c2 = max_ind.loc['c2']
-                
-    #             [max_c_hat, max_c1, max_c2] = check_boundary([max_c_hat, max_c1, max_c2],['c_hat','c1','c2'])
-    
-    #             list_add = (max_c1, max_c2, max_c_hat)
-            
-    #         extra_indeces.append(list_add)
-    # df_etas['extra_coordinates'] = extra_indeces
-    # ---------------------------#
     
     # Power capacity cost
     df_cs_count = df1_update.query("E_cor >= @threshold_E")[['c1','c2',output]].groupby(['c2','c1']).count() #quantile(quantile,interpolation='nearest').copy()
@@ -419,17 +339,6 @@ def plot_2D_panels(sector, slack, threshold, normfactor=100, color_variable='cou
             extra_indeces.append(list_add)
     df_chat_eta2['extra_coordinates'] = extra_indeces
     # ---------------------------#
-    
-    # # Plotting
-    # # Capacity cost
-    # nrows = 4
-    # ncols = 4
-    # annotate(df_cs, df1_update, color_variable, nrows, ncols, var1='c2', var2='c1', var_name1=r'$c_c$' + ' [€/kW]', var_name2 = r'$c_d$' + ' [€/kW]', ax=ax[0], normfactor=normfactor,  write_extra_indices=write_extra_indices, shading=shading, colormap=cmap)
-    
-    # # Efficiency
-    # nrows = 3
-    # ncols = 3 if omit_charge_efficiency else 4
-    # annotate(df_etas, df1_update, color_variable, nrows, ncols, var1='eta2',var2='eta1',var_name1=r'$\eta_c$' + ' [-]',var_name2=r'$\eta_d$' + ' [-]', ax=ax[1], normfactor=normfactor, write_extra_indices=write_extra_indices,shading=shading, colormap=cmap)
     
     # Energy capacity cost vs discharge efficiency
     nrows = 3
