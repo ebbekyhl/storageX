@@ -31,6 +31,7 @@ The Jupyter Notebook "Storage-X" directs to the functions creating the main figu
 
 The results folder contains the results (.csv files) obtained with the "make_sspace.py" script. These include:
 - `sspace_3888.csv`: results obtained for the Electricity system with 3888 samples
+- `sspace_2016.csv`: results obtained for the Electricity system with the initial sample space
 - `sspace_w_sector_coupling_merged.csv`: results obtained for the Electricity system, the Electricity + Heating + Land Transport system, and the Fully sector-coupled system based on 758 storage samples (+ additional 324 when allowing technologies with charge energy efficiency above unity)
 - `simple_sweep/`: folder with single-parametric sweeps for 2013 weather year
 - `weather_sensitivity/`: folder with single-parametric sweeps at variable weather years
