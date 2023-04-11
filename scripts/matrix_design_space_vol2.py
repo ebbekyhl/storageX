@@ -492,7 +492,7 @@ for sector in sectors:
              fontsize = 30,
              color = "grey")
     
-    fig.savefig('../figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '_mean.png', dpi=300, bbox_inches='tight')
+    fig.savefig('../figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '_mean.png', dpi=600, bbox_inches='tight')
 
 
 

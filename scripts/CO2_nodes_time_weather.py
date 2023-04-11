@@ -161,4 +161,4 @@ for var in variables:
     ax.grid(which='both',axis='y')
     
     fig.savefig('../figures/Reference_' + var + '_sectors.png',
-                          bbox_inches="tight",dpi=300)
+                          bbox_inches="tight",dpi=600)

@@ -10,9 +10,9 @@ def plot_single_sweep(fig,axes,sector,output,output_text,factor,fs,lw1,ms1,dfs):
                  'T-H':'blue',
                  'T-H-I-B':'orange'}
     
-    zorder_sec = {'-':3,
-                 'T-H':2,
-                 'T-H-I-B':1}
+    zorder_sec = {'-':6,
+                 'T-H':5,
+                 'T-H-I-B':4}
     
     df2 = dfs[0]
     df3 = dfs[1]

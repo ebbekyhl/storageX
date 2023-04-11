@@ -294,5 +294,5 @@ for ax in [ax7,ax8,ax9,ax10,ax11,ax12]:
 ii = 0
 params = ['c_c','c_d','eta_c','eta_d','chat','tau']
 for fig in [fig7,fig8,fig9,fig10,fig11,fig12]:
-    fig.savefig('../figures/Sampling_space_' + params[ii] + '_' + str(threshold) +'.png',dpi=300,bbox_inches="tight")
+    fig.savefig('../figures/Sampling_space_' + params[ii] + '_' + str(threshold) +'.png',dpi=600,bbox_inches="tight")
     ii += 1

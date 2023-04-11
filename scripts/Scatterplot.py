@@ -233,7 +233,7 @@ def plot_scatter(sector='T-H-I-B',
     scatter_vals_picked = df_legend_picked_i['val'].round(0).astype(str).to_list()    
     fig.legend(scatter_picked,scatter_vals_picked, 
                bbox_to_anchor=(1.1, 0.8),
-               title = scaling_dic2[scaling],
+               title = scaling_dic2[scaling], title_fontsize=fs,
                prop={'size':fs},
                frameon=True)
 
@@ -308,11 +308,11 @@ def plot_scatter(sector='T-H-I-B',
     
     if color == 'RTE':
         fig.savefig('figures/scatter_plot_' + t + '_' + yval + '_' + str(sector) + '.png', transparent=False,
-                    bbox_inches="tight",dpi=300)
+                    bbox_inches="tight",dpi=600)
     elif color == 'c_c':
         fig.savefig('figures/scatter_plot_' + t + '_' + yval + str(sector) + '_c_c.png', transparent=False,
-                    bbox_inches="tight",dpi=300)
+                    bbox_inches="tight",dpi=600)
     else:
         fig.savefig('figures/scatter_plot_' + t + '_' + yval + str(sector) + '_' + color + '.png', transparent=False,
-                    bbox_inches="tight",dpi=300)
+                    bbox_inches="tight",dpi=600)
         

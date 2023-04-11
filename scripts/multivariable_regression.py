@@ -136,7 +136,7 @@ def multivariable_regression(fitting='E',
         plt.xlabel(r'$\log E$')
         plt.ylabel(r'$\log \hat{E}$')
         plt.savefig('figures/GLM_fit_' + fitting + str(scaling) + '.png',
-                bbox_inches="tight",dpi=300)
+                bbox_inches="tight",dpi=600)
         # plt.xlim([0,max([max(y),max(est2.predict(X_val))])])
         # plt.ylim([0,max([max(y),max(est2.predict(X_val))])])
         
@@ -193,5 +193,5 @@ def multivariable_regression(fitting='E',
             ax.text(0.5+j,0.3+i,added_R2_adj[i][j],fontsize=15, horizontalalignment='center', verticalalignment = 'center',color='grey')
     
     fig.savefig('figures/GLM_coefficients_sectors_' + fitting + str(scaling) + '.png',
-                bbox_inches="tight",dpi=300)
+                bbox_inches="tight",dpi=600)
     

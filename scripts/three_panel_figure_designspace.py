@@ -355,7 +355,7 @@ def plot_2D_panels(sector, slack, threshold, normfactor=100, color_variable='cou
     
     cb.set_label('Configurations \n ' + 'E' + r'$\geq$' + '2TWh (%)', rotation=90,fontsize=18,labelpad=16)
     
-    fig.savefig('figures/Panel_requirements_' + sector + '_' + output + '_' + shading + '.png', dpi=300, bbox_inches='tight')
+    fig.savefig('figures/Panel_requirements_' + sector + '_' + output + '_' + shading + '.png', dpi=600, bbox_inches='tight')
     
     
         

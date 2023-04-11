@@ -448,4 +448,4 @@ def plot_spiderweb(scen = 'T-H-I-B', threshold_E = 2000, plot_ex = False, candid
         plot_existing(data_plot_ex,frame,radar,color,marker,lw=2)
                     
     fig1.savefig('figures/Spiderweb_result_' + scen+ '_w_' + '_' + colvar + '_Nperf' + str(N_perfections) + '.png',
-                    bbox_inches="tight",dpi=300)
+                    bbox_inches="tight",dpi=600)

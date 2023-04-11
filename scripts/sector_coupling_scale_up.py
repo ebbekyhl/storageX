@@ -113,7 +113,7 @@ ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
 
 ax.legend(prop={'size':fs})
 ax.set_xlabel('Storage-X energy capacity (TWh)')
-fig.savefig('../figures/Storagex_energycap.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Storagex_energycap.png', dpi=600, bbox_inches='tight')
 #%% POWER CAPACITY FOR ALL THREE SYSTEMS
 fig,ax = plt.subplots()
 
@@ -148,7 +148,7 @@ ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
 
 ax.legend(prop={'size':fs},frameon=True)
 ax.set_xlabel('Storage-X power capacity (GW)')
-fig.savefig('../figures/Storagex_powercap.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Storagex_powercap.png', dpi=600, bbox_inches='tight')
 #%% ENERGY CAPACITY SCALE UP BY INCLUDING SECTORS
 fig,ax = plt.subplots()
 
@@ -174,7 +174,7 @@ ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
 
 ax.legend(prop={'size':fs},frameon=True)
 ax.set_xlabel('Storage-X energy capacity change (' + r'$\times$' + ' $E^{Electricity}$' + ')')
-fig.savefig('../figures/Storagex_energycap_change.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Storagex_energycap_change.png', dpi=600, bbox_inches='tight')
 
 #%% POWER CAPACITY SCALE UP BY INCLUDING SECTORS
 fig,ax = plt.subplots()
@@ -201,7 +201,7 @@ ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
 
 ax.legend(prop={'size':fs},frameon=True)
 ax.set_xlabel('Storage-X power capacity change (' + r'$\times$' + ' $G_d^{Electricity}$' + ')')
-fig.savefig('../figures/Storagex_powercap_change.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Storagex_powercap_change.png', dpi=600, bbox_inches='tight')
 
 #%% DURATION
 fig,ax = plt.subplots()
@@ -220,7 +220,7 @@ ax.set_xlabel('Storage-X duration (hours)')
 ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
 print('Max duration (storage-X):')
 print(str(pd.concat([duration['-'],duration['T-H'],duration['T-H-I-B']]).quantile(1).round(2)),' hours')
-fig.savefig('../figures/Storagex_duration.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Storagex_duration.png', dpi=600, bbox_inches='tight')
 
 fig,ax = plt.subplots()
 bat_E_df = bat_E_sector.loc[E_sector[sector1][E_sector[sector1] >= threshold].index]
@@ -234,7 +234,7 @@ ax.set_xlabel('Battery duration (hours)')
 ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
 print('Max battery duration:')
 print(str(pd.concat([bat_duration['-'],bat_duration['T-H'],bat_duration['T-H-I-B']]).quantile(1).round(2)),' hours')
-fig.savefig('../figures/Battery_duration.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Battery_duration.png', dpi=600, bbox_inches='tight')
 
 #%% BATTERY CAPACITY
 fig,ax = plt.subplots()
@@ -244,7 +244,7 @@ sn.distplot(1000*bat_E_df['T-H-I-B'][bat_E_df['T-H-I-B']*1000 > 0.01],ax=ax,labe
 ax.legend(prop={'size':fs},frameon=True)
 ax.set_xlabel('Battery energy capacity [GWh]')
 ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
-fig.savefig('../figures/Battery_energycap.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Battery_energycap.png', dpi=600, bbox_inches='tight')
 
 fig,ax = plt.subplots()
 sn.distplot(bat_G_df['-'][bat_G_df['-']>0.005],ax=ax,label=sector_names[2],color='green')
@@ -253,7 +253,7 @@ sn.distplot(bat_G_df['T-H-I-B'][bat_G_df['T-H-I-B']>0.005],ax=ax,label=sector_na
 ax.legend(prop={'size':fs},frameon=True)
 ax.set_xlabel('Battery power capacity [GW]')
 ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
-fig.savefig('../figures/Battery_powercap.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Battery_powercap.png', dpi=600, bbox_inches='tight')
 #%% DURATION CHANGE
 fig,ax = plt.subplots()
 
@@ -278,7 +278,7 @@ ax.set_yticklabels([ "{:0.3f}".format(x) for x in ax.get_yticks()])
 
 ax.legend(prop={'size':fs},frameon=True)
 ax.set_xlabel('Storage-X duration change (' + r'$\times$' + ' duration$^{Electricity}$' + ')')
-fig.savefig('../figures/Storagex_duration_change.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Storagex_duration_change.png', dpi=600, bbox_inches='tight')
 
 #%% LOAD COVERAGE
 fig,ax = plt.subplots()
@@ -294,7 +294,7 @@ ax.legend(prop={'size':fs},frameon=True)
 ax.set_xlabel('Storage-X load coverage [%]')
 print('Max load coverage (95% quantile):')
 print(str(pd.concat([LC_df['-'],LC_df['T-H'],LC_df['T-H-I-B']]).quantile(0.95).round(2)),' %')
-fig.savefig('../figures/Storagex_load_coverage.png', dpi=300, bbox_inches='tight')
+fig.savefig('../figures/Storagex_load_coverage.png', dpi=600, bbox_inches='tight')
 #%%
 sspace_ref = sspace[sspace.loc['eta1 [-]'][sspace.loc['eta1 [-]'] == 0.5].index]
 sspace_ref = sspace_ref[sspace_ref.loc['c_hat [EUR/kWh]'][sspace_ref.loc['c_hat [EUR/kWh]'] == 2].index]

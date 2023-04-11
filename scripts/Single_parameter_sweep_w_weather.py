@@ -157,4 +157,4 @@ def single_parametric_sweep(variable='E'):
     fig1.tight_layout() 
     fig1.savefig('figures/Storage_parameter_hierarchi_' + variable + '_absolute_values_subplot_weather_and_sector.png', 
                  bbox_inches="tight", 
-                 dpi=300)
+                 dpi=600)

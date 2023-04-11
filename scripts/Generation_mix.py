@@ -198,10 +198,13 @@ def plot_generation_mix(tech_colors,sector):
     ax_gen.set_xlabel('Storage ' + x_vardic1[x_var])
     
     if sector == 0:
-        fig_gen.legend(bbox_to_anchor=(0.8, -0.05),ncol=3,prop={'size':18},frameon=True)
+        fig_gen.legend(bbox_to_anchor=(0.8, -0.05),ncol=3,frameon=True)
     else:
-        fig_gen.legend(bbox_to_anchor=(0.9, -0.05),ncol=3,prop={'size':18},frameon=True)
-    fig_gen.savefig('figures/Actual_generation mix_' + x_vardic[x_var] + '_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
+        fig_gen.legend(bbox_to_anchor=(0.9, -0.05),ncol=3,frameon=True)
+    fig_gen.savefig('figures/Actual_generation mix_' + x_vardic[x_var] + '_' + str(sector) + '.png',
+                    bbox_inches="tight",
+                    dpi=600,
+                    transparent=False)
     
     #%%
     if df_caps['gas_CHP_CC'].max() > 1:
@@ -255,13 +258,16 @@ def plot_generation_mix(tech_colors,sector):
     
     # ax2.set_ylim([0,500])
     if sector == 'T-H':
-        ax1.legend(prop={'size':18},ncol=1,bbox_to_anchor=(0.3,0.085))
+        ax1.legend(ncol=1,bbox_to_anchor=(0.3,0.085))
     else:
-        ax1.legend(prop={'size':18},ncol=1)
+        ax1.legend(ncol=1)
         
-    ax2.legend(prop={'size':18})
+    ax2.legend()
     
-    fig.savefig('figures/Generation mix_' + x_vardic[x_var] + '_' + str(sector) + '.png',bbox_inches="tight",dpi=300)
+    fig.savefig('figures/Generation mix_' + x_vardic[x_var] + '_' + str(sector) + '.png',
+                bbox_inches="tight",
+                dpi=600,
+                transparent=False)
     
     #%%
     # Wind share

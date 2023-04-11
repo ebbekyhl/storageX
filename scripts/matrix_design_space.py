@@ -323,6 +323,6 @@ def plot_matrix(quantiles = [0.25,0.50,0.75,1.00], sector = 'T-H-I-B', threshold
              fontsize = 30,
              color = "grey")
     
-    fig.savefig('figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '.png', dpi=300, bbox_inches='tight')
+    fig.savefig('figures/Matrix_requirements_' + sector + '_' + output + '_' + shading + '.png', dpi=600, bbox_inches='tight')
     
     

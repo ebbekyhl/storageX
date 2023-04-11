@@ -435,4 +435,4 @@ def plot_2D_panels(sector,
     
     cb.set_label('Configurations \n ' + 'E' + r'$\geq$' + '2TWh (%)', rotation=90,fontsize=18,labelpad=16)
     
-    fig.savefig('figures/Panel_requirements_' + sector + '_' + output + '_' + shading + '_old.png', dpi=300, bbox_inches='tight')
+    fig.savefig('figures/Panel_requirements_' + sector + '_' + output + '_' + shading + '_old.png', dpi=600, bbox_inches='tight')
